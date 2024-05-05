@@ -21,7 +21,7 @@
     <div class="row">
       <div class="col-md-6">
        
-        <p>New or Existing Patient?</p>
+        <h4>New or Existing Patient?</h4>
       </div>
     </div>
     <div class="form-row row">
@@ -32,7 +32,7 @@
           
           <input class="form-check-input" type="radio" name="existed_patient" id="new_patient" value="false">
           <label class="radio" for="new_patient">
-          <span>New patient</span>
+          New patient
           </label>
         </div>
         <div class="form-check">
@@ -40,7 +40,7 @@
          
           <input class="form-check-input" type="radio" name="existed_patient" id="existed_patient" value="true">
           <label class="radio" for="existed_patient">
-          <span>Existing patient</span>
+          Existing patient
           </label>
         </div>
         

@@ -2,19 +2,43 @@
 <div class="container">
     <form>
         <div class="form-group">
-            <label>Do you have dental insurance?</label><br>
-            <input type="radio" id="insuranceYes" name="insurance" value="yes">
-            <label for="insuranceYes">Yes</label><br>
-            <input type="radio" id="insuranceNo" name="insurance" value="no">
-            <label for="insuranceNo">No</label>
+            <h4>Do you have dental insurance?</h4>
+            <div class="insurance-block">
+                <input type="radio" id="insuranceYes" name="insurance" value="yes">
+                <label for="insuranceYes">Yes</label>
+                <input type="radio" id="insuranceNo" name="insurance" value="no">
+                <label for="insuranceNo">No</label>
+            </div>
         </div>
         <div class="form-group">
-            <label>Are you scheduling this appointment for you, or someone else?</label><br>
-            <input type="radio" id="appointmentMe" name="appointment" value="me">
-            <label for="appointmentMe">Me</label><br>
-            <input type="radio" id="appointmentSomeoneElse" name="appointment" value="someoneElse">
-            <label for="appointmentSomeoneElse">Someone else</label>
+            <h4>Are you scheduling this appointment for you, or someone else?</h4>
+            <div class="whois-app">
+                <input type="radio" id="appointmentMe" name="appointment" value="me" <?php if(is_null($body_cont['for_who_app']) || $body_cont['for_who_app'] == 'me' ){ echo 'checked';} ?>>
+                <label for="appointmentMe">Me</label>
+                <input type="radio" id="appointmentSomeoneElse" name="appointment" value="someoneElse" <?php if($body_cont['for_who_app'] == 'someoneElse' ){ echo 'checked';} ?>>
+                <label for="appointmentSomeoneElse">Someone else</label>
+            </div>
         </div>
+        <div class="form-group other-pat" <?php if(is_null($body_cont['for_who_app']) || $body_cont['for_who_app'] == 'me' ){ echo 'style="display:none;"';} ?>>
+            <div class="text-inputs">
+                <input class="form-control" type="text" id="patient-fname" name="fname" placeholder="Patient first name*" required>
+                
+                <input class="form-control" type="text" id="patient-lname" name="lname" placeholder="Patient last name*" required>
+                
+                <input class="form-control" type="text" id="patient-dob" name="dob" placeholder="Patient data of birth*" required>  
+            </div> 
+            <div class="form-group parent-guardian">
+                
+                <h4>Are you the parent or legal guardian of the patient?</h4>
+                <div class="parent-guardian-inputs">
+                    <input type="radio" id="parent" name="parent-guardian" value="yes">
+                    <label for="parent">Yes</label>
+                    <input type="radio" id="guardian" name="parent-guardian" value="no">
+                    <label for="guardian">No</label>      
+                </div>  
+            </div>
+        </div>
+        
     </form>
 </div>
 <div class="buttons-row">  
@@ -27,31 +51,19 @@
     </div>
 </div>
 <script>
+    function toggleOtherPatBlock(){
+        var forWho = $('input[name="appointment"]:checked').val();
+        if(forWho == 'someoneElse'){
+            $('.other-pat').fadeIn();
+        }else{
+            $('.other-pat').fadeOut();
+        }
+        
+    }
     $(document).ready(function(){
-        $('#bk-btn').click(function(e){
-            e.preventDefault();
-            window.location.href = 'index.php?step=3';
-        });
-    });
-    $('#btn-ctn').click(function(e){
-        e.preventDefault();
-        var insurance = $('input[name="insurance"]:checked').val();
-        var appointment = $('input[name="appointment"]:checked').val();
-        var step = 4;
-        $.ajax({
-            url: 'index.php',
-            type: 'POST',
-            data: {
-                insurance: insurance,
-                appointment: appointment,
-                step: step
-            },
-            success: function(response){
-                if (response.status == 'success') {
-                    window.location.href = 'index.php?step=5';
-                }
-                console.log(response);
-            }
+        
+        $('input[name="appointment"]').change(function(){
+            toggleOtherPatBlock();
         });
     });
 </script>

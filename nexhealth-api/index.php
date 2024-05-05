@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'start_date' => $_SESSION['start_date'] ?? null,
                 'end_date' => $_SESSION['end_date'] ?? null,
                 'days' => $_SESSION['days'] ?? null,
+                'for_who_app' => $_SESSION["for_who_app"] ?? null,
                 'appointment_type' => $_SESSION["app_type"] ?? '',
                 'providers_ids' => $_SESSION["providers_ids"] ?? null,
                 'full_time' => $_SESSION["full_time"] ?? null,
@@ -48,10 +49,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
        include('template/body.php');
     } else {
         $body_cont = [
-            'step' =>1,
+            'step' => $step ?? 1,
             'fname' => $_SESSION["fname"] ?? '',
             'lname' => $_SESSION["lname"] ?? '',
+            'slots' => $_SESSION["slots"] ?? null,
+            'show_type' => $_SESSION['show_type'] ?? false,
+            'filter_days' => $_SESSION['filter_days'] ?? null,
+            'filter_hours' => $_SESSION['filter_hours'] ?? null,
+            'start_date' => $_SESSION['start_date'] ?? null,
+            'end_date' => $_SESSION['end_date'] ?? null,
+            'days' => $_SESSION['days'] ?? null,
+            'for_who_app' => $_SESSION["for_who_app"] ?? null,
+            'appointment_type' => $_SESSION["app_type"] ?? '',
+            'providers_ids' => $_SESSION["providers_ids"] ?? null,
+            'full_time' => $_SESSION["full_time"] ?? null,
+            'operatory_id' => $_SESSION["operatory_id"] ?? null,
+            'day' => $_SESSION["day"] ?? null,
+            'time' => $_SESSION["time"] ?? null,
             'existing_patient' => $_SESSION["existing_patient"] ?? false,
+            'providers_arr' => $_SESSION['doctors_arr'] ?? null,
      ];
         include('template/body.php');
     }
@@ -256,10 +272,7 @@ function getDayTimeSlots($slots_array, $filter_days = null, $filter_hours = null
                 $time = $dateTime->format('H:i');
                 $dayOfWeek = $dateTime->format('D');
                 $meridiem = $dateTime->format('A');
-                //var_dump($filter_days);
-                //var_dump($filter_hours);
-                //var_dump($dayOfWeek);
-                //var_dump($meridiem);
+                
                 if((!is_null($filter_days) && in_array($dayOfWeek, $filter_days)) || is_null($filter_days)){
                    
                     if (!isset($newSlots[$date])) {
