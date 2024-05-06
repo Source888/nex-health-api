@@ -65,5 +65,64 @@
         $('input[name="appointment"]').change(function(){
             toggleOtherPatBlock();
         });
+        $('#btn-ctn').click(function(){
+            var insurance = $('input[name="insurance"]:checked').val();
+            var appointment = $('input[name="appointment"]:checked').val();
+            var fname = $('#patient-fname').val();
+            var lname = $('#patient-lname').val();
+            var dob = $('#patient-dob').val();
+            var parentGuardian = $('input[name="parent-guardian"]:checked').val();
+            var error = false;
+            if(insurance == undefined){
+                alert('Please select if you have dental insurance');
+                error = true;
+            }
+            if(appointment == undefined){
+                alert('Please select who you are scheduling this appointment for');
+                error = true;
+            }
+            if(appointment == 'someoneElse'){
+                if(fname == ''){
+                    alert('Please enter patient first name');
+                    error = true;
+                }
+                if(lname == ''){
+                    alert('Please enter patient last name');
+                    error = true;
+                }
+                if(dob == ''){
+                    alert('Please enter patient date of birth');
+                    error = true;
+                }
+                if(parentGuardian == undefined){
+                    alert('Please select if you are the parent or legal guardian of the patient');
+                    error = true;
+                }
+            }
+            if(error){
+                return false;
+            }
+            var data = {
+                insurance: insurance,
+                appointment: appointment,
+                fname: fname,
+                lname: lname,
+                dob: dob,
+                step: 4,
+                parentGuardian: parentGuardian
+            };
+            $.ajax({
+                url: 'index.php',
+                type: 'POST',
+                data: data,
+                success: function(response){
+                    if(response.status == 'success'){
+                        window.location.href = 'index.php?step=5';
+                    }else{
+                        alert(response.message);
+                    }
+                }
+            });
+        });
     });
 </script>

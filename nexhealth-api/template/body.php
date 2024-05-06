@@ -1,9 +1,12 @@
+<?php
+require_once dirname(__DIR__) . '/classes/Patient.php';
+?>
 <div class="container-full-widht">
     <div class="step-sidebar">
         <ul class="steps checklist">
             <li class="step-item">
 
-                <div class="step-mark <?php if($body_cont['step'] == 1){ echo 'current'; } else if ($body_cont['step'] > 1) { echo 'completed';} ?>"><span class="mark "><?php if($body_cont['step'] <= 1){ echo 1; } else if ($body_cont['step'] > 1) { echo '✔';} ?></span><div class="vert-line"></div></div><div  class="step-link <?php if($body_cont['step'] == 1){ echo 'current'; } else if ($body_cont['step'] > 1) { echo 'completed';} ?>"><a href="index.php">Your Information</a><p><?=($body_cont['fname'])?> <?=($body_cont['lname'])?></p></div>
+                <div class="step-mark <?php if($body_cont['step'] == 1){ echo 'current'; } else if ($body_cont['step'] > 1) { echo 'completed';} ?>"><span class="mark "><?php if($body_cont['step'] <= 1){ echo 1; } else if ($body_cont['step'] > 1) { echo '✔';} ?></span><div class="vert-line"></div></div><div  class="step-link <?php if($body_cont['step'] == 1){ echo 'current'; } else if ($body_cont['step'] > 1) { echo 'completed';} ?>"><a href="index.php">Your Information</a><p><?=($body_cont['patient']->first_name)?> <?=($body_cont['patient']->last_name)?></p></div>
             </li>
             <li class="step-item">
                 <div class="step-mark <?php if($body_cont['step'] == 2){ echo 'current'; } else if ($body_cont['step'] > 2) { echo 'completed';} ?>"><span class="mark"><?php if($body_cont['step'] <= 2){ echo 2; } else if ($body_cont['step'] > 2) { echo '✔';} ?></span><div class="vert-line"></div></div><div  class="step-link <?php if($body_cont['step'] == 2){ echo 'current'; } else if ($body_cont['step'] > 2) { echo 'completed';} ?>"><a href="index.php?step=2">Reason for Visit</a><p> <?=($body_cont['appointment_type'])?></p></div>

@@ -1,3 +1,6 @@
+<?php
+require_once dirname(__DIR__) . '/classes/Patient.php';
+?>
 <h2 class="form-title">PLEASE ENTER YOUR INFORMATION</h2>
 <form class="step-one" action="index.php" method="post">
     <div class="form-row row">

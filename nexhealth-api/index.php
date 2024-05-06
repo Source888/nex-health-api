@@ -25,8 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
        $step = $_GET['step'];
        $body_cont = [
                 'step' => $step,
-                'fname' => $_SESSION["fname"] ?? '',
-                'lname' => $_SESSION["lname"] ?? '',
+                'patient' => $_SESSION['patient'] ?? null,
                 'slots' => $_SESSION["slots"] ?? null,
                 'show_type' => $_SESSION['show_type'] ?? false,
                 'filter_days' => $_SESSION['filter_days'] ?? null,
@@ -43,6 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'time' => $_SESSION["time"] ?? null,
                 'existing_patient' => $_SESSION["existing_patient"] ?? false,
                 'providers_arr' => $_SESSION['doctors_arr'] ?? null,
+                'insurance' => $_SESSION["insurance"] ?? null,
+                'appointment' => $_SESSION["appointment"] ?? null,
+                'parentGuardian' => $_SESSION["parentGuardian"] ?? null,
+                'guardian' => $_SESSION["guardian"] ?? null,
+                'provider' => $_SESSION["provider"] ?? null,
          ];
        
        extract($body_cont);
@@ -50,8 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         $body_cont = [
             'step' => $step ?? 1,
-            'fname' => $_SESSION["fname"] ?? '',
-            'lname' => $_SESSION["lname"] ?? '',
+            'patient' => $_SESSION['patient'] ?? null,
             'slots' => $_SESSION["slots"] ?? null,
             'show_type' => $_SESSION['show_type'] ?? false,
             'filter_days' => $_SESSION['filter_days'] ?? null,
@@ -68,6 +71,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'time' => $_SESSION["time"] ?? null,
             'existing_patient' => $_SESSION["existing_patient"] ?? false,
             'providers_arr' => $_SESSION['doctors_arr'] ?? null,
+            'insurance' => $_SESSION["insurance"] ?? null,
+            'appointment' => $_SESSION["appointment"] ?? null,
+            'parentGuardian' => $_SESSION["parentGuardian"] ?? null,
+            'guardian' => $_SESSION["guardian"] ?? null,
+            'provider' => $_SESSION["provider"] ?? null,
      ];
         include('template/body.php');
     }
@@ -86,16 +94,13 @@ echo $output;
             $lname = $post_data['lname'];
             $email = $post_data['email'];
             $phone = $post_data['phone'];
-            $_SESSION["fname"] = $fname;
-            $_SESSION["lname"] = $lname;
-            $_SESSION["email"] = $email;
-            $_SESSION["phone"] = $phone;
             $existed_patient = $post_data['existed_patient'] === 'true' ? true : false;
             $patient = new Patient();
             $patient->setFirstName($fname);
             $patient->setLastName($lname);
             $patient->setEmail($email);
             $patient->setPhoneNumber($phone);
+            $_SESSION['patient'] = $patient;
             //var_dump($existed_patient);
             if ($existed_patient) {
                 $_SESSION["existing_patient"] = true;
@@ -178,12 +183,51 @@ echo $output;
             $_SESSION["day"] = $day;
             $_SESSION["time"] = $time;
             $_SESSION['pid'] = explode(",", $post_data['pid']);
-
+            $_SESSION['provider'] = getChusenProvider($_SESSION['doctors_arr'], $_SESSION['pid'][0]);
             $response = [
                 'status' => 'success',
                 'message' => 'Step 3',
             ];
-        } else if ($step == 4) {
+        } else if($step == 4){
+            $insurance = $post_data['insurance'] ?? null;
+            $appointment = $post_data['appointment'] ?? null;
+            if(!is_null($appointment)){
+                $for_who_app = $appointment;
+                $_SESSION["for_who_app"] = $for_who_app;
+                if($for_who_app == 'someoneElse'){
+                    $fname = $post_data['fname'] ?? null;
+                    $lname = $post_data['lname'] ?? null;
+                    $dob = $post_data['dob'] ?? null;
+                    $patient = new Patient();
+                    $guardian = $_SESSION['patient'];
+                    $patient->first_name = $fname;
+                    $patient->last_name = $lname;
+                    $patient->date_of_birth = $dob;
+                    $patient->setPhoneNumber($guardian->phone_number);
+                    $patient->setEmail($guardian->email);
+                    $patient->provider_id = $guardian->provider_id;
+                    $parentGuardian = $post_data['parentGuardian'] ?? null;
+                    $_SESSION['guardian'] = $guardian;
+                    $_SESSION['patient'] = $patient;
+                    $_SESSION["parentGuardian"] = $parentGuardian;
+                }
+            }
+            
+            $_SESSION["insurance"] = $insurance;
+            $_SESSION["appointment"] = $appointment;
+           
+            
+            $response = [
+                'status' => 'success',
+                'message' => 'Step 4',
+            ];
+        } else if($step == 5){
+            $response = [
+                'status' => 'success',
+                'message' => 'Step 5',
+            ];
+        
+        } else if ($step == 'confirm_appointment') {
             if(!$_SESSION["existing_patient"]){
                 $patient = new Patient();
                 $patient->setFirstName($_SESSION["fname"]);
@@ -215,7 +259,12 @@ echo $output;
             $startDateAndDays = getStartDateAndDays($date);
             $_SESSION['start_date'] = $startDateAndDays[0];
             $_SESSION['end_date'] = $startDateAndDays[2];
-            $_SESSION['days'] = $startDateAndDays[1];
+            if($_SESSION['start_date'] == $_SESSION['end_date']){
+                $_SESSION['days'] = 1;
+            } else {
+                $_SESSION['days'] = $startDateAndDays[1];
+            }
+           
             $ext_pat = $_SESSION["existing_patient"];
             getSlots($ext_pat, $_SESSION['start_date'], $_SESSION['days'], $_SESSION['filter_days'] ?? null, $_SESSION['filter_hours'] ?? null, $_SESSION['show_type'] ?? false);
             $response = [
@@ -313,8 +362,8 @@ function getDayTimeSlots($slots_array, $filter_days = null, $filter_hours = null
 function getStartDateAndDays($date_string){
     list($startDateString, $endDateString) = explode(" - ", $date_string);
 
-    $startDate = DateTime::createFromFormat('d/m/Y', $startDateString);
-    $endDate = DateTime::createFromFormat('d/m/Y', $endDateString);
+    $startDate = DateTime::createFromFormat('Y-m-d', $startDateString);
+    $endDate = DateTime::createFromFormat('Y-m-d', $endDateString);
 
     $startDateFormatted = $startDate->format('Y-m-d');
     $endDateFormatted = $endDate->format('Y-m-d');
@@ -358,4 +407,11 @@ function getSlots($ext_pat, $startDate = null, $Days = null, $filter_days = null
         return $slots_to_view;
     }
     
+}
+function getChusenProvider($providers, $pid){
+    foreach ($providers as $provider) {
+        if($provider->id == $pid){
+            return $provider;
+        }
+    }
 }

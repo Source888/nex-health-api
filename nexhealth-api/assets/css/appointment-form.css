@@ -405,7 +405,7 @@ a.cross.datepick-cmd.datepick-cmd-close:hover {
   margin-top: 10px;
 }
 .datepick-month td .datepick-selected {
-  background-color: #27C0C8 !important;
+  background-color: #27c0c878 !important;
   color: #ffffff !important;
 
 }
@@ -698,4 +698,99 @@ button.filter-apply {
 label {
   font-weight: 400;
   font-size: 1.3em;
+}
+.appointment-info {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.appointment-info > div {
+  border: 1px solid #b2b2b2;
+  padding: 15px 25px;
+  position: relative;
+  flex: 49%;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  
+}
+.title-edit-block > a {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  color: #b2b2b2;
+  font-weight: 600;
+  font-size: 1.6rem;
+}
+.appointment-comment {
+  position: relative;
+  width: 100%;
+  margin-top: 16px;
+}
+.symbols-left {
+  position: absolute;
+  right: 25px;
+  bottom: 5px;
+  color: #b2b2b2;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+.appointment-comment > label {
+  position: absolute;
+  background-color: #fff;
+  padding: 0 5px;
+  top: -12px;
+  left: 15px;
+}
+.appointment-info > div > div > p {
+  font-size: 1.3em;
+  font-weight: 500;
+}
+.title-edit-block > h3 {
+  font-weight: 600;
+}
+textarea#comment {
+  padding: 15px 25px;
+  font-size: 1.3em;
+  resize: none;
+  overflow-y: scroll;
+}
+textarea::-webkit-scrollbar {
+  width: 14px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  border: 4px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  border-radius: 9999px;
+  background-color: #AAAAAA;
+}
+input#app-conf {
+  background-color: #27c0c8;
+  color: #FFF;
+  border-color: #27c0c8;
+  border-radius: 40px;
+  padding: 7px 50px;
+  font-size: 24px;
+  min-width: 198px;
+  border: none;
+}
+td:has(a.datepick-selected):first-child {
+  border-bottom-left-radius: 15px;
+  overflow: hidden;
+  border-top-left-radius: 15px;
+}
+td:has(a.datepick-selected):last-child {
+  border-bottom-right-radius: 15px;
+  overflow: hidden;
+  border-top-right-radius: 15px;
+}
+tr td a {
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }

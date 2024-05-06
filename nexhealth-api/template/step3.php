@@ -7,8 +7,8 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
 <div class="container">
 <div class="dateselect">
     <label for="rangePicker" class="calendar-label">Calendar</label>
-  <input type="text" id="rangePicker" class="form-control" size="10" data-datepick="showOtherMonths: true, firstDay: 1, dateFormat: 'dd/mm/yyyy', 
-        minDate: 'new Date()'" placeholder="Select a date or range">
+  <input type="text" id="rangePicker" class="form-control" size="10" data-datepick="showOtherMonths: true, firstDay: 1, dateFormat: 'yyyy-mm-dd', 
+        minDate: 'new Date()'" placeholder="Select a date or range" <?php if(!is_null($body_cont['start_date']) && !is_null($body_cont['end_date']) ) { echo "value='{$body_cont['start_date']} - {$body_cont['end_date']}'";}?>>
   <button class="filter-btn" id="filter-btn" onclick="showFilter();">Filter</button>
 </div>
 <div class="toggler-section">
@@ -146,6 +146,22 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
 </div>
 </section>
 <script>
+    function firstLastBorders(){
+        var selectedElements = document.querySelectorAll('a.datepick-selected');
+        var firstA = $('a.datepick-selected').first();
+        var lastA = $('a.datepick-selected').last();
+        
+        if($('a.datepick-selected').length == 1){
+            firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
+            firstA.parent().css("cssText", "border-radius: 20px;");
+        } else {
+            firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
+            firstA.parent().css("cssText", "border-top-left-radius: 20px; border-bottom-left-radius: 20px; background-color: #27c0c878 !important;");
+            lastA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
+            lastA.parent().css("cssText", "border-top-right-radius: 20px; border-bottom-right-radius: 20px; background-color: #27c0c878 !important;");
+        }
+        
+    }
     function initSlides(){
         $('.slider').slick({
             slidesToShow: <?php if($body_cont['existing_patient']) { echo 3; } else { echo 5; } ?>,
@@ -199,25 +215,43 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             }
         });
     }
-    
+var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body_cont['end_date']) ) { echo "{$body_cont['start_date']} - {$body_cont['end_date']}";}?>';
+
  $('#rangePicker').datepick({ 
     rangeSelect: true,
     prevText: '<',
     nextText: '>',
     todayText: '',
+    rangeSeparator: ' - ',
+    
+    onShow: function() {
+        firstLastBorders();
+        
+        
+    },
     clearText: 'Reset',
     closeText: 'Apply',
     changeMonth: false,
     changeYear: false,
     onClose: function() {
-        updateView();
+        
+        if(typeof $('#rangePicker').val() == undefined || date_string != $('#rangePicker').val()){
+            date_string = $('#rangePicker').val();
+            updateView();
+        }
+        
     },
     });
     $(document).ready(function(){
         initSlides();
+        
         $(document).on('click', '.slot-block', function(e){
             $('.slot-block').removeClass('selected');
             $(this).addClass('selected');
+        });
+        $(document).on('click', 'tr td a', function(){
+            firstLastBorders();
+        
         });
         $(document).on('click', '.filter-apply', function(e){
             e.preventDefault();
