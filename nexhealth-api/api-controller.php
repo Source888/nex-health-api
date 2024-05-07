@@ -1,6 +1,15 @@
 <?php
 require_once 'classes/Patient.php';
 require_once 'classes/Provider.php';
+$prod = true;
+if($prod === true){
+    $GLOBALS['subdomain'] = 'island-dental-associates';
+    $GLOBALS['location_id'] = 19226;
+} else {
+    $GLOBALS['subdomain'] = 'island-dental-associates-sandbox';
+    $GLOBALS['location_id'] = 119742;
+}
+
 function getBearerToken() {
 
     $now = new DateTime();
@@ -16,7 +25,8 @@ function getBearerToken() {
     $date_time = isset($token_date_time[1]) ? $token_date_time[1] : null;
     if(!$date_time || $now->diff(new DateTime($date_time))->m > 50) {
         $url = 'https://nexhealth.info/authenticates';
-        $token = 'aXNsYW5kLWRlbnRhbC1hc3NvYy1zYW5kYm94.7cPCG59VSZbD0kKiX4_HRJA0V4ZWKiMy';
+        //$token = 'aXNsYW5kLWRlbnRhbC1hc3NvYy1zYW5kYm94.7cPCG59VSZbD0kKiX4_HRJA0V4ZWKiMy';
+        $token = 'aXNsYW5kLWRlbnRhbC1hc3NvYw.qE4eYXuMGt5PiTW_LKEq6-y2Ngc-pRey';
         $headers = array(
             'Accept: application/vnd.Nexhealth+json; version=2',
             'Content-Type: application/json',
@@ -55,7 +65,7 @@ function getBearerToken() {
     
 }
 function getDoctors($patient = null) {
-    $url = 'https://nexhealth.info/providers?subdomain=island-dental-associates-sandbox&location_id=119742&include[]=appointment_types&per_page=20';
+    $url = "https://nexhealth.info/providers?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&include[]=appointment_types&per_page=70";
     $token = getBearerToken();
     $headers = array(
         'Accept: application/vnd.Nexhealth+json; version=2',
@@ -90,6 +100,7 @@ function getDoctors($patient = null) {
             $provider->provider_requestables = $doctor['provider_requestables'];
             $provider->availabilities = $doctor['availabilities'];
             $provider->appointment_slots = $doctor['appointment_slots'];
+            $provider->nexhealth_specialty = ($doctor['nexhealth_specialty'] == "Unknown") ? "" : $doctor['nexhealth_specialty'];
             if(!is_null($patient) && $patient->last_visited_provider_id == $provider->id){
                 $provider->last_visited = true;
             } else {
@@ -107,9 +118,9 @@ function getDoctors($patient = null) {
 
 function findExtPatientId($patient){
     if(!$patient->email || is_null($patient->email) || $patient->email == 'test@test.com') {
-        $url = 'https://nexhealth.info/patients?name='.$patient->first_name.'%20'.$patient->last_name.'&new_patient=false&subdomain=island-dental-associates-sandbox&location_id=119742';
+        $url = "https://nexhealth.info/patients?name=".$patient->first_name."%20".$patient->last_name."&new_patient=false&subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}";
     } else {
-        $url = 'https://nexhealth.info/patients?new_patient=false&subdomain=island-dental-associates-sandbox&location_id=119742&email=' . $patient->email;
+        $url = "https://nexhealth.info/patients?new_patient=false&subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&email=" . $patient->email;
     }
     
     $token = getBearerToken();
@@ -150,7 +161,7 @@ function findExtPatientId($patient){
     }
 }
 function findExtPatient($patient_id){
-    $url = "https://nexhealth.info/patients/{$patient_id}?subdomain=island-dental-associates-sandbox&location_id=119742&include[]=last_visited_appointment";
+    $url = "https://nexhealth.info/patients/{$patient_id}?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&include[]=last_visited_appointment";
     $token = getBearerToken();
     $headers = array(
         'Accept: application/vnd.Nexhealth+json; version=2',
@@ -189,7 +200,7 @@ function findExtPatient($patient_id){
     }
 }
 function createPatient($patient){
-    $url = 'https://nexhealth.info/patients?subdomain=island-dental-associates-sandbox&location_id=119742';
+    $url = "https://nexhealth.info/patients?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}";
     $token = getBearerToken();
     $headers = array(
         'Accept: application/vnd.Nexhealth+json; version=2',
@@ -267,7 +278,7 @@ function getAppointmentSlots($pids, $appointment_type_id = null, $start_date = n
         $appointment_type_id_part = '';
     }
     //var_dump($providers_part);
-    $url = "https://nexhealth.info/appointment_slots?subdomain=island-dental-associates-sandbox&start_date={$start_date}&days={$days}&lids[]=119742&pids[]={$providers_part}&overlapping_operatory_slots=false&slot_length=30{$appointment_type_id_part}";
+    $url = "https://nexhealth.info/appointment_slots?subdomain={$GLOBALS['subdomain']}&start_date={$start_date}&days={$days}&lids[]={$GLOBALS['location_id']}&pids[]={$providers_part}&overlapping_operatory_slots=false&slot_length=30{$appointment_type_id_part}";
     $token = getBearerToken();
     $headers = array(
         'Accept: application/vnd.Nexhealth+json; version=2',
@@ -299,7 +310,7 @@ function getAppointmentSlots($pids, $appointment_type_id = null, $start_date = n
     return $responseArray;
 }
 function createAppointment($provider_id, $patient_id, $operatory_id, $start_time, $appointment_type_id = null){
-    $url = 'https://nexhealth.info/appointments?subdomain=island-dental-associates-sandbox&location_id=119742&notify_patient=false';
+    $url = "https://nexhealth.info/appointments?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&notify_patient=false";
     $token = getBearerToken();
     $headers = array(
         'Accept: application/vnd.Nexhealth+json; version=2',
@@ -363,7 +374,7 @@ function getAppointmentTypeId($app_type){
         
         }
     }
-    $url = 'https://nexhealth.info/appointment_types?subdomain=island-dental-associates-sandbox&location_id=119742&include[]=descriptors';
+    $url = "https://nexhealth.info/appointment_types?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&include[]=descriptors";
     $token = getBearerToken();
     $headers = [
         'Authorization: Bearer ' . $token,
@@ -405,7 +416,7 @@ function getAvailabilities($provider_id=null, $operatory_id=null) {
         $operatory_id_part = '';
     }
     $token = getBearerToken();
-    $url = 'https://nexhealth.info/availabilities?subdomain=island-dental-associates-sandbox&location_id=119742&page=1&include[]=appointment_types&per_page=5&active=true&ignore_past_dates=false'.$provider_id_part.$operatory_id_part;
+    $url = "https://nexhealth.info/availabilities?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&page=1&include[]=appointment_types&per_page=5&active=true&ignore_past_dates=false".$provider_id_part.$operatory_id_part;
     $headers = array(
         'Accept: application/vnd.Nexhealth+json; version=2',
         'Content-Type: application/json',

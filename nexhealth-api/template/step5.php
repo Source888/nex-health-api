@@ -9,7 +9,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         <div class="patient-info">
             <div class="title-edit-block">
             <h3>Patient Information</h3>
-            <a href="index.php?step=1">Edit</a>
+            <a href="javascript:void(0)" class="edit-step" data-step="1">Edit</a>
             </div>
             <div class="patient-info-block">
                 <p>Name: <?=($body_cont['patient']->first_name)?> <?=($body_cont['patient']->last_name)?></p>
@@ -20,7 +20,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         <div class="additional-info">
             <div class="title-edit-block">
             <h3>Additional Information</h3>
-            <a href="index.php?step=4">Edit</a>
+            <a href="javascript:void(0)" class="edit-step" data-step="4">Edit</a>
             </div>
             <div class="additional-info-block">
                 <p><?=($body_cont['patient']->email)?></p>
@@ -40,7 +40,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                 <?php } else { ?>
                     <h3>Date & Time</h3>
                 <?php } ?>
-                <a href="index.php?step=2">Edit</a>
+                <a href="javascript:void(0)" class="edit-step" data-step="3">Edit</a>
             </div>
             <div class="date-time-info-block">
                 <?php 
@@ -58,7 +58,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         <div class="reason-info">
             <div class="title-edit-block">
                 <h3>Reason for Visit</h3>
-                <a href="index.php?step=3">Edit</a>
+                <a href="javascript:void(0)" class="edit-step" data-step="2">Edit</a>
             </div>
             <div class="reason-info-block">
                 <p><?=($body_cont['appointment_type'])?></p>
@@ -83,6 +83,22 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
 
 <script>
     $(document).ready(function(){
+        $('.edit-step').click(function(){
+            var step_to_edit = $(this).data('step');
+            var step = 'edit_step';
+            var data = {
+                step: step,
+                step_to_edit : step_to_edit
+            };
+            $.ajax({
+                url: 'index.php',
+                type: 'POST',
+                data: data,
+                success: function(response){
+                    console.log(response);
+                }
+            });
+        });
         $('#app-conf').click(function(e){
             e.preventDefault();
             var comment = $('#comment').val();

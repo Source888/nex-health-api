@@ -36,7 +36,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                     <div class="provider-block">
                         <div class="provider-info">
                             <h3><?php echo $provider->first_name; ?> <?php echo $provider->last_name; ?></h3>
-                            <p><?php echo $provider->specialty; ?></p>
+                            <p><?php echo $provider->nexhealth_specialty; ?></p>
                             <div class="provider-img">
                                 <img src="<?php echo $provider->profile_url; ?>" alt="<?php echo $provider->first_name; ?>">
                             </div>

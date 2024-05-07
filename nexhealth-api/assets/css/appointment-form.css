@@ -499,6 +499,7 @@ span.slot-day {
 }
 .provider-img > img {
   max-width: 120px;
+  border-radius: 60px;
 }
 p.previous-provider {
   color: #27c0c8;
@@ -793,4 +794,9 @@ tr td a {
   display: flex !important;
   align-items: center;
   justify-content: center;
+}
+.provider-info p {
+  font-size: 1.3em;
+  color: #b2b2b2;
+  margin: 15px 0;
 }
