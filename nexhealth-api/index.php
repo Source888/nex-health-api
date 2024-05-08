@@ -2,7 +2,8 @@
 include_once('api-controller.php');
 include_once('classes/Patient.php');
 include_once('classes/Provider.php');
-
+include_once('classes/Appointment.php');
+session_set_cookie_params(43200);
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -25,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
        $step = $_GET['step'];
        $body_cont = [
                 'step' => $step,
+                'editing' => $_SESSION['editing'] ?? false,
                 'patient' => $_SESSION['patient'] ?? null,
                 'slots' => $_SESSION["slots"] ?? null,
                 'show_type' => $_SESSION['show_type'] ?? false,
@@ -33,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'start_date' => $_SESSION['start_date'] ?? null,
                 'end_date' => $_SESSION['end_date'] ?? null,
                 'days' => $_SESSION['days'] ?? null,
+                'dob' => $_SESSION['dob'] ?? null,
                 'for_who_app' => $_SESSION["for_who_app"] ?? null,
                 'appointment_type' => $_SESSION["app_type"] ?? '',
                 'providers_ids' => $_SESSION["providers_ids"] ?? null,
@@ -53,8 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
        include('template/body.php');
     } else {
         $body_cont = [
-            'step' => $step ?? 1,
+            'step' =>$step ?? 1,
             'patient' => $_SESSION['patient'] ?? null,
+            'editing' => $_SESSION['editing'] ?? false,
             'slots' => $_SESSION["slots"] ?? null,
             'show_type' => $_SESSION['show_type'] ?? false,
             'filter_days' => $_SESSION['filter_days'] ?? null,
@@ -62,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'start_date' => $_SESSION['start_date'] ?? null,
             'end_date' => $_SESSION['end_date'] ?? null,
             'days' => $_SESSION['days'] ?? null,
+            'dob' => $_SESSION['dob'] ?? null,
             'for_who_app' => $_SESSION["for_who_app"] ?? null,
             'appointment_type' => $_SESSION["app_type"] ?? '',
             'providers_ids' => $_SESSION["providers_ids"] ?? null,
@@ -87,23 +92,27 @@ echo $output;
     
     if (isset($post_data['step'])) {
         $step = $post_data['step'];
-        
+        $_SESSION['step'] = $step;
+        $after_edit = ($post_data['after_edit'] == 'true') ? true : false;
         /* Step 1 */
         if ($step == 1) {
             $fname = $post_data['fname'];
             $lname = $post_data['lname'];
             $email = $post_data['email'];
             $phone = $post_data['phone'];
+            
+            
             $existed_patient = $post_data['existed_patient'] === 'true' ? true : false;
+            $_SESSION["existing_patient"] = $existed_patient;
             $patient = new Patient();
             $patient->setFirstName($fname);
             $patient->setLastName($lname);
             $patient->setEmail($email);
             $patient->setPhoneNumber($phone);
-            $_SESSION['patient'] = $patient;
+           
             //var_dump($existed_patient);
             if ($existed_patient) {
-                $_SESSION["existing_patient"] = true;
+                
                 
                 $ext_pat_data = findExtPatientId($patient);
 
@@ -119,16 +128,29 @@ echo $output;
                     'message' => 'Existing patient',
                     
                 ];
+                if($after_edit){
+                    $_SESSION['editing'] = !$after_edit;
+                    $response = ['redirect' => 'index.php?step=5'];
+                   
+                }
                 //var_dump($response);
             } else {
-                $_SESSION["existing_patient"] = false;
                 
-                //die();
+                $dob = $post_data['dob'];
+                $_SESSION['dob'] = $dob;
+                $patient->setDateOfBirth($dob);
+                
                 $response = [
                     'status' => 'success',
                     'message' => 'New patient',
                 ];
+                if($after_edit){
+                    $_SESSION['editing'] = !$after_edit;
+                    $response = ['redirect' => 'index.php?step=5'];
+                    
+                }
             }
+            $_SESSION['patient'] = $patient;
         } else if ($step == 2) {
             $appointment_type = $post_data['app_type'] ?? null;
             $_SESSION["app_type"] = $appointment_type;
@@ -173,6 +195,11 @@ echo $output;
                 'status' => 'success',
                 'message' => 'Step 2',
             ];
+            if($after_edit){
+                $_SESSION['editing'] = !$after_edit;
+                header('Location: index.php?step=3');
+                
+            }
         } else if ($step == 3) {
             $full_time = $post_data['date_time'] ?? null;
             $operatory_id = $post_data['operatory_id'] ?? null;
@@ -188,6 +215,11 @@ echo $output;
                 'status' => 'success',
                 'message' => 'Step 3',
             ];
+            if($after_edit){
+                $_SESSION['editing'] = false;
+                $response = ['redirect' => 'index.php?step=5'];
+                
+            }
         } else if($step == 4){
             $insurance = $post_data['insurance'] ?? null;
             $appointment = $post_data['appointment'] ?? null;
@@ -207,9 +239,14 @@ echo $output;
                     $patient->setEmail($guardian->email);
                     $patient->provider_id = $guardian->provider_id;
                     $parentGuardian = $post_data['parentGuardian'] ?? null;
+                    if(!is_null($parentGuardian) && $parentGuardian == 'yes'){
+                        $_SESSION["parentGuardian"] = true;
+                    } else {
+                        $_SESSION["parentGuardian"] = false;
+                    }
                     $_SESSION['guardian'] = $guardian;
                     $_SESSION['patient'] = $patient;
-                    $_SESSION["parentGuardian"] = $parentGuardian;
+                    
                 }
             }
             
@@ -221,7 +258,13 @@ echo $output;
                 'status' => 'success',
                 'message' => 'Step 4',
             ];
-        } else if($step == 5){
+            if($after_edit){
+                $_SESSION['editing'] = !$after_edit;
+                $response = ['redirect' => 'index.php?step=5'];
+                
+            }
+        } else if($step == 'destroy_session'){
+            session_destroy();
             $response = [
                 'status' => 'success',
                 'message' => 'Step 5',
@@ -229,30 +272,57 @@ echo $output;
         
         } else if ($step == 'confirm_appointment') {
             if(!$_SESSION["existing_patient"]){
-                $patient = new Patient();
-                $patient->setFirstName($_SESSION["fname"]);
-                $patient->setLastName($_SESSION["lname"]);
-                $patient->setEmail($_SESSION["email"]);
-                $patient->provider_id = $_SESSION["providers_ids"][0];
-                $patient->date_of_birth = '1990-01-01';
-                $patient->setPhoneNumber($_SESSION["phone"]);
-                $new_pat = createPatient($patient);
-               if(is_array($new_pat)){
-                $idStartPos = strpos($new_pat[0], 'id=') + 3;
-                $id = substr($new_pat[0], $idStartPos);
-                $id = intval($id);
-                $_SESSION['patient_id'] = $id;
-               } else {
-                $_SESSION['patient_id'] = $new_pat->id;
-               }
+                if($_SESSION["appointment"] == 'someoneElse'){
+                    $_SESSION['guardian']->provider_id = $_SESSION["pid"][0];
+                
+                
+                    $new_pat = createPatient($_SESSION['guardian']);
+                    if(is_array($new_pat)){
+                        $idStartPos = strpos($new_pat[0], 'id=') + 3;
+                        $id = substr($new_pat[0], $idStartPos);
+                        $id = intval($id);
+                        $_SESSION['patient_id'] = $id;
+                    } else {
+                        $_SESSION['patient_id'] = $new_pat->id;
+                    }
+                } else {
+                    $_SESSION['patient']->provider_id = $_SESSION["pid"][0];
+                    $new_pat = createPatient($_SESSION['patient']);
+                    //var_dump($new_pat);
+                    if(is_array($new_pat)){
+                        $idStartPos = strpos($new_pat[0], 'id=') + 3;
+                        $id = substr($new_pat[0], $idStartPos);
+                        $id = intval($id);
+                        $_SESSION['patient_id'] = $id;
+                    } else {
+                        $_SESSION['patient_id'] = $new_pat->id;
+                    }
+                }
+                
+            } 
+            $comment = $post_data['comment'] ?? '';
+            $_SESSION['comment'] = $comment;
+            $appointment = new Appointment();
+            if($_SESSION["appointment"] == 'someoneElse'){
+                $appointment->for_else_people = true;
             }
-            
-            $res = createAppointment($_SESSION['pid'][0], $_SESSION['patient_id'], $_SESSION['operatory_id'][0], $_SESSION['full_time'],$_SESSION['app_type_id']);
-            var_dump($res);
-            die();
+            $appointment->patient_id = $_SESSION['patient_id'];
+            $appointment->provider_id = $_SESSION['pid'][0];
+            $appointment->operatory_id = $_SESSION['operatory_id'][0];
+            $appointment->start_date = $_SESSION['full_time'];
+            $appointment->appointment_type_id = $_SESSION['app_type_id'];
+            $appointment->note = $comment;
+            $appointment->is_new_clients_patient = !$_SESSION["existing_patient"];
+            $appointment->is_guardian = $_SESSION["parentGuardian"];
+            $appointment->patient = $_SESSION['patient'];
+            //$res = createAppointment($_SESSION['pid'][0], $_SESSION['patient_id'], $_SESSION['operatory_id'][0], $_SESSION['full_time'],$_SESSION['app_type_id']);
+            $res = createAppointment($appointment);
+            //var_dump($res);
+            //die();
             $response = [
                 'status' => 'success',
                 'message' => 'Step 4',
+                'data' => $res,
             ];
         } else if ($step == 'filter_dates') {
             $date = $post_data['date'];
@@ -295,7 +365,14 @@ echo $output;
                 'status' => 'success',
                 'message' => 'Display type changed',
             ];
-        } else {
+        } else if($step == 'edit_step') {
+            $step = $post_data['step_to_edit'];
+            $_SESSION['editing'] = true;
+            
+            $response = ['redirect' => 'index.php?step='.$step];
+           
+        } 
+        else {
             $response = [
                 'status' => 'error',
                 'message' => 'Invalid step',

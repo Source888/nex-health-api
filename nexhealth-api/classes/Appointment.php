@@ -11,7 +11,7 @@ class Appointment {
     public $is_new_clients_patient;
     public Patient $patient;
     public $is_guardian = false;
-
+    public $for_else_people = false;
 
     public function __construct($data = null){
         if($data){
@@ -32,7 +32,7 @@ class Appointment {
         $date = new DateTime($this->start_date);
         $date->add(new DateInterval('PT30M'));
         $end_date_time = $date->format('Y-m-d\TH:i:s.vP');
-        if($this->is_guardian === true && is_object($this->patient)){
+        if($this->for_else_people === true && is_object($this->patient)){
             $data['patient_id'] = $this->patient_id;
             $data['provider_id'] = $this->provider_id;
             $data['operatory_id'] = $this->operatory_id;
@@ -61,6 +61,7 @@ class Appointment {
         if(isset($this->appointment_type_id)){
             $data['appointment_type_id'] = $this->appointment_type_id;
         }
+        $data = array('appt' => $data);
         return $data;
     }
 }

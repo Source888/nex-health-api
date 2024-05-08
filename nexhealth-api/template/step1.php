@@ -5,18 +5,18 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
 <form class="step-one" action="index.php" method="post">
     <div class="form-row row">
     <div class="form-group col-md-6">
-    <input class="form-control" type="text" id="fname" name="fname" placeholder="First Name*" required>
+    <input class="form-control" type="text" id="fname" name="fname" placeholder="First Name*" required <?php if(!is_null($body_cont['patient'])){ echo "value='".$body_cont['patient']->first_name."'"; } ?>>
     </div>
     <div class="form-group col-md-6">
-    <input  class="form-control" type="text" id="lname" name="lname" placeholder="Last Name*" required>
+    <input  class="form-control" type="text" id="lname" name="lname" placeholder="Last Name*" required <?php if(!is_null($body_cont['patient'])){ echo "value='".$body_cont['patient']->last_name."'"; } ?>>
     </div>
     </div>
     <div class="form-row row">
     <div class="form-group col-md-6">
-    <input class="form-control" type="email" id="email" name="email" placeholder="Email*" required>
+    <input class="form-control" type="email" id="email" name="email" placeholder="Email*" required <?php if(!is_null($body_cont['patient'])){ echo "value='".$body_cont['patient']->email."'"; } ?>>
     </div>
     <div class="form-group col-md-6">
-    <input class="form-control" type="tel" id="phone" name="phone" placeholder="Phone Number*" required>
+    <input class="form-control" type="tel" id="phone" name="phone" placeholder="Phone Number*" required <?php if(!is_null($body_cont['patient'])){ echo "value='".$body_cont['patient']->phone_number."'"; } ?>>
     </div>
     </div>
     
@@ -48,14 +48,20 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
         </div>
         
       </div>
-    
+      <div class="form-group col-md-6 dob-field">
+        <label for="dob">DOB</label>
+        <input class="form-control" type="text" id="dob" name="dob" placeholder="Select a date*"  <?php if(!is_null($body_cont['patient'])){ echo "value='".$body_cont['patient']->date_of_birth."'"; } ?>>
+      </div>
   
     </div>
     </div>
     <div class="buttons-row">  
-    <input type="button" id="bk-btn" value="Back">
-    <input type="submit" id="btn-ctn" value="Continue">
-
+      <?php if($body_cont['editing'] === false){ ?>
+          <input type="button" id="bk-btn" value="Back">
+          <input type="submit" id="btn-ctn" value="Continue">
+      <?php } else { ?>
+        <input type="submit" id="btn-ctn" value="Save">
+      <?php } ?>
     </div>
     
 </form>
@@ -65,19 +71,51 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
     </div>
 </div>
 <script>
+  function toggleDOBBlock(){
+        var ex_p = $('input[name="existed_patient"]:checked').val();
+        if(ex_p == 'false'){
+            $('.dob-field').fadeIn();
+            $('#dob').attr('required', 'required');
+        }else{
+            $('.dob-field').fadeOut();
+            $('#dob').removeAttr('required');
+        }
+        
+    }
+    var dateInput = document.getElementById('dob');
+
+    dateInput.addEventListener('focus', function (e) {
+        this.type = 'date';
+    });
+
+    dateInput.addEventListener('blur', function (e) {
+        if (this.value == "") {
+            this.type = 'text';
+        }
+    });
     $(document).ready(function(){
         $('#bk-btn').click(function(e){
             e.preventDefault();
             window.location.href = 'index.php';
         });
+        $('input[name="existed_patient"]').change(function(){
+            toggleDOBBlock();
+        });
+        toggleDOBBlock();
         $('#btn-ctn').click(function(e){
             e.preventDefault();
             var fname = $('#fname').val();
             var lname = $('#lname').val();
             var email = $('#email').val();
             var phone = $('#phone').val();
+            var after_edit = <?php if($body_cont['editing']){ echo 'true'; } else { echo 'false'; } ?>;
             var step = 1;
             var existed_patient = $('input[name="existed_patient"]:checked').val();
+            if(existed_patient == 'false' && $('.dob-field').is(":visible")){
+                var dob = $('#dob').val();
+            } else {
+                var dob = '';
+            }
             $.ajax({
                 url: 'index.php',
                 type: 'POST',
@@ -86,7 +124,9 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
                     lname: lname,
                     email: email,
                     phone: phone,
+                    after_edit: after_edit,
                     step: step,
+                    dob: dob,
                     existed_patient: existed_patient
                 },
                 success: function(response){
@@ -94,6 +134,10 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
                         
                             window.location.href = 'index.php?step=2';
                         
+                    } else if (response.redirect) {
+                        window.location.href = response.redirect;
+                    } else{
+                        alert(response.message);
                     }
                     console.log(response);
                 }

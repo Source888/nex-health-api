@@ -1,13 +1,15 @@
 <?php
 require_once 'classes/Patient.php';
 require_once 'classes/Provider.php';
-$prod = true;
+$prod = false;
 if($prod === true){
     $GLOBALS['subdomain'] = 'island-dental-associates';
     $GLOBALS['location_id'] = 19226;
+    $GLOBALS['api_token'] = 'aXNsYW5kLWRlbnRhbC1hc3NvYw.qE4eYXuMGt5PiTW_LKEq6-y2Ngc-pRey';
 } else {
     $GLOBALS['subdomain'] = 'island-dental-associates-sandbox';
     $GLOBALS['location_id'] = 119742;
+    $GLOBALS['api_token'] = 'aXNsYW5kLWRlbnRhbC1hc3NvYy1zYW5kYm94.7cPCG59VSZbD0kKiX4_HRJA0V4ZWKiMy';
 }
 
 function getBearerToken() {
@@ -25,12 +27,11 @@ function getBearerToken() {
     $date_time = isset($token_date_time[1]) ? $token_date_time[1] : null;
     if(!$date_time || $now->diff(new DateTime($date_time))->m > 50) {
         $url = 'https://nexhealth.info/authenticates';
-        //$token = 'aXNsYW5kLWRlbnRhbC1hc3NvYy1zYW5kYm94.7cPCG59VSZbD0kKiX4_HRJA0V4ZWKiMy';
-        $token = 'aXNsYW5kLWRlbnRhbC1hc3NvYw.qE4eYXuMGt5PiTW_LKEq6-y2Ngc-pRey';
+        
         $headers = array(
             'Accept: application/vnd.Nexhealth+json; version=2',
             'Content-Type: application/json',
-            'Authorization: ' . $token
+            'Authorization: ' . $GLOBALS['api_token']
         );
     
         $ch = curl_init($url);
@@ -309,7 +310,7 @@ function getAppointmentSlots($pids, $appointment_type_id = null, $start_date = n
     }
     return $responseArray;
 }
-function createAppointment($provider_id, $patient_id, $operatory_id, $start_time, $appointment_type_id = null){
+function createAppointment($appointment){//($provider_id, $patient_id, $operatory_id, $start_time, $appointment_type_id = null){
     $url = "https://nexhealth.info/appointments?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&notify_patient=false";
     $token = getBearerToken();
     $headers = array(
@@ -317,7 +318,7 @@ function createAppointment($provider_id, $patient_id, $operatory_id, $start_time
         'Content-Type: application/json',
         'Authorization: Bearer ' . $token
     );
-    $date = new DateTime($start_time);
+   /* $date = new DateTime($appointment->start_date);
     $date->add(new DateInterval('PT30M'));
     $end_date_time = $date->format('Y-m-d\TH:i:s.vP');
     if(is_null($appointment_type_id)){
@@ -343,8 +344,8 @@ function createAppointment($provider_id, $patient_id, $operatory_id, $start_time
                 'is_new_clients_patient' => !$_SESSION["existing_patient"]
             )
         );
-    }
-    
+    }*/
+    $data = $appointment->getPostData();
 
     $data = json_encode($data);
 
@@ -363,7 +364,13 @@ function createAppointment($provider_id, $patient_id, $operatory_id, $start_time
     curl_close($ch);
 
     $responseArray = json_decode($response, true);
-    return $responseArray;
+    if(!is_array($responseArray['error'])){
+        $aapt = $responseArray['data']['appt'];
+        $appointment->id = $aapt['id'];
+        return $appointment;
+    } else {
+        return $responseArray['error'][0];
+    }
 }
 function getAppointmentTypeId($app_type){
     if($app_type == 'Cleaning' || $app_type == 'Emergency'){

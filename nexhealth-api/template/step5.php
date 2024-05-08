@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/classes/Patient.php';
 require_once dirname(__DIR__) . '/classes/Provider.php'; 
+var_dump($_SESSION['patient_id']);
 ?>
 <h2 class="form-title">REVIEW & CONFIRM APPOINTMENT</h2>
 <h4>Click 'Confirm My Appointment' to complete your scheduling</h4>
@@ -12,9 +13,9 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             <a href="javascript:void(0)" class="edit-step" data-step="1">Edit</a>
             </div>
             <div class="patient-info-block">
-                <p>Name: <?=($body_cont['patient']->first_name)?> <?=($body_cont['patient']->last_name)?></p>
-                <p>Email: <?=($body_cont['patient']->email)?></p>
-                <p>Phone: <?=($body_cont['patient']->phone)?></p>
+                <p><?=($body_cont['patient']->first_name)?> <?=($body_cont['patient']->last_name)?></p>
+                <p><?=($body_cont['patient']->date_of_birth)?></p>
+                
             </div>
         </div>
         <div class="additional-info">
@@ -44,8 +45,8 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             </div>
             <div class="date-time-info-block">
                 <?php 
-                    $date = new DateTime('2024-05-07T09:30:00.000-07:00');
-                    $date_to_wiev = $date->format('l, F Y - g:i A');
+                    $date = new DateTime($body_cont['full_time']);
+                    $date_to_wiev = $date->format('l, F d - g:i A');
                 ?>
                 <p><?=($date_to_wiev)?></p>
                 <?php if($body_cont['existing_patient']){ ?>
@@ -95,7 +96,9 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                 type: 'POST',
                 data: data,
                 success: function(response){
-                    console.log(response);
+                    if(response && typeof response.redirect == 'string'){
+                        window.location.href = response.redirect;
+                    }
                 }
             });
         });
@@ -114,7 +117,11 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                 type: 'POST',
                 data: data,
                 success: function(response){
-                    console.log(response);
+                    if(typeof response.data == 'string'){
+                        alert('Error:' + response.data);
+                    } else {
+                        window.location.href = 'index.php?step=6';
+                    }
                 }
             });
         });

@@ -12,4 +12,25 @@
         $('#loader-overlay').hide();
     });
 });
+window.onbeforeunload = function() {
+    timeoutId = setTimeout(function() {
+    var step = 'session_destroy';
+    var data = {
+                step: step
+                
+               
+            };
+            $.ajax({
+                url: 'index.php',
+                type: 'POST',
+                data: data,
+                success: function(response){
+                    
+                }
+            });
+        }, 2000);     
+};
+window.onload = function() {
+    clearTimeout(timeoutId);
+};
 </script>

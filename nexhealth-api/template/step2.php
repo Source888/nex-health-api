@@ -44,8 +44,14 @@
     </div>
 </div>
 <div class="buttons-row">  
-    <input type="button" id="bk-btn" value="Back">
-    <input type="submit" id="btn-ctn" value="Continue">
+  
+      <?php if($body_cont['editing'] === false){ ?>
+          <input type="button" id="bk-btn" value="Back">
+          <input type="submit" id="btn-ctn" value="Continue">
+      <?php } else { ?>
+        <input type="submit" id="btn-ctn" value="Save">
+      <?php } ?>
+ 
 </div>
 <div class="container">
   <div class="row need-help">
@@ -65,17 +71,24 @@
                 $('#btn-ctn').click(function(e){
                         e.preventDefault();
                         var step = 2;
+                        var after_edit = <?php if($body_cont['editing']){ echo 'true'; } else { echo 'false'; } ?>;
                         var app_type = $('.app-type-block.selected h3').text();
                         $.ajax({
                                 url: 'index.php',
                                 type: 'POST',
                                 data: {
                                         step: step,
-                                        app_type: app_type
+                                        app_type: app_type,
+                                        
                                 },
                                 success: function(response) {
-                                        console.log(response);
-                                        window.location.href = 'index.php?step=3';
+                                        if(response && typeof response.redirect == 'string'){
+                                                window.location.href = response.redirect;
+                                        } else if (response.status == 'success') {
+                                                window.location.href = 'index.php?step=3';
+                                        } else{
+                                                alert(response.message);
+                                        }
                                 }
                         });
                 });

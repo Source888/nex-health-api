@@ -21,8 +21,8 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         </div>
         <?php } else { ?>
             <div class="today">
-                <input type="checkbox" id="today" name="today" value="today">
-                <label for="today">Today</label> 
+                <label for="today"> <input type="checkbox" id="today" name="today" value="today">
+                Today</label> 
             </div>
     <?php } ?>
 </div>
@@ -103,8 +103,14 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
 <?php } ?>
 
 <div class="buttons-row">  
-    <input type="button" id="bk-btn" value="Back">
-    <input type="submit" id="btn-ctn" value="Continue">
+
+      <?php if($body_cont['editing'] === false){ ?>
+          <input type="button" id="bk-btn" value="Back">
+          <input type="submit" id="btn-ctn" value="Continue">
+      <?php } else { ?>
+        <input type="submit" id="btn-ctn" value="Save">
+      <?php } ?>
+
 </div>
 </div>
 <div class="container">
@@ -306,7 +312,23 @@ var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body
         
         $(this).toggleClass('selected');
     });
-    
+    $(document).on('change', '#today', function(e){
+        var d_string = $('#rangePicker').val();
+        var today = new Date();
+            
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var yyyy = today.getFullYear();
+
+            today = yyyy + '-' + mm + '-' + dd;
+            var to_ins = today + ' - ' + today;
+            console.log(to_ins, d_string);
+        if ($(this).is(':checked') && d_string != to_ins) {
+            
+            $('#rangePicker').val(to_ins);
+            updateView();
+        }
+    });
     $(document).on('click', '#bk-btn', function(e){
         e.preventDefault();
         window.location.href = 'index.php?step=2';
@@ -319,6 +341,7 @@ var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body
         var operatory_id = $('.slot-block.selected span').data('operatory-id');
         var pid = $('.slot-block.selected span').data('pid');
         var step = 3;
+        var after_edit = <?php if($body_cont['editing']){ echo 'true'; } else { echo 'false'; } ?>;
         $.ajax({
             url: 'index.php',
             type: 'POST',
@@ -328,11 +351,16 @@ var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body
                 day: day,
                 operatory_id: operatory_id,
                 pid: pid,
-                step: step
+                step: step,
+                after_edit: after_edit
             },
             success: function(response){
                 if (response.status == 'success') {
                     window.location.href = 'index.php?step=4';
+                } else if (typeof response.redirect === 'string') {
+                        window.location.href = response.redirect;
+                } else{
+                    alert(response.message);
                 }
                 console.log(response);
             }

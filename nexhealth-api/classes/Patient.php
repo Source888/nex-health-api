@@ -124,7 +124,9 @@ public function getDateOfBirth() {
 }
 
 public function setDateOfBirth($date_of_birth) {
-    $this->date_of_birth = $date_of_birth;
+    $date = new DateTime($date_of_birth);
+    $formated_date = $date->format('Y-m-d');
+    $this->date_of_birth = $formated_date;
 }
 
 public function getPhoneNumber() {

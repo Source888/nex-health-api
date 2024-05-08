@@ -42,8 +42,14 @@
     </form>
 </div>
 <div class="buttons-row">  
-    <input type="button" id="bk-btn" value="Back">
-    <input type="submit" id="btn-ctn" value="Continue">
+  
+      <?php if($body_cont['editing'] === false){ ?>
+          <input type="button" id="bk-btn" value="Back">
+          <input type="submit" id="btn-ctn" value="Continue">
+      <?php } else { ?>
+        <input type="submit" id="btn-ctn" value="Save">
+      <?php } ?>
+    
 </div>
 <div class="container">
   <div class="row need-help">
@@ -71,6 +77,7 @@
             var fname = $('#patient-fname').val();
             var lname = $('#patient-lname').val();
             var dob = $('#patient-dob').val();
+            var after_edit = <?php if($body_cont['editing']){ echo 'true'; } else { echo 'false'; } ?>;
             var parentGuardian = $('input[name="parent-guardian"]:checked').val();
             var error = false;
             if(insurance == undefined){
@@ -109,7 +116,8 @@
                 lname: lname,
                 dob: dob,
                 step: 4,
-                parentGuardian: parentGuardian
+                parentGuardian: parentGuardian,
+                after_edit: after_edit
             };
             $.ajax({
                 url: 'index.php',
@@ -118,7 +126,9 @@
                 success: function(response){
                     if(response.status == 'success'){
                         window.location.href = 'index.php?step=5';
-                    }else{
+                    } else if (response.redirect) {
+                        window.location.href = response.redirect;
+                    } else{
                         alert(response.message);
                     }
                 }

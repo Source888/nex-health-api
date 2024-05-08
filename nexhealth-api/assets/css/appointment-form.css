@@ -800,3 +800,159 @@ tr td a {
   color: #b2b2b2;
   margin: 15px 0;
 }
+.dob-field {
+  display: none;
+}
+input[type="date"]#dob::-webkit-calendar-picker-indicator {
+  background: none;
+  background-size: auto;
+  background-repeat: no-repeat;
+  color: transparent;
+  cursor: pointer;
+}
+input#dob {
+  background-image: url(images/calendar.png);
+  background-repeat: no-repeat;
+  background-position: 98% 12px;
+  background-size: auto;
+}
+.dob-field > label {
+  position: absolute;
+  background-color: #fff;
+  padding: 0 5px;
+  top: -12px;
+  left: 35px;
+}
+.form-group.col-md-6.dob-field {
+  margin-top: -10px;
+}
+.main-banner {
+  position: relative;
+  width: 100%;
+  min-height: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+h1.appt-info-ttl {
+  color: #fff;
+  text-align: center;
+  text-transform: uppercase;
+}
+.main-banner::after {
+  content: "";
+  background-image: url(../img/hero_bg.webp);
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  filter: brightness(0.5);
+  z-index: -1;
+  min-height: 720px;
+}
+.col-md-12.greeting-message {
+  display: flex;
+  /* background-color: red; */
+  flex-direction: column;
+  align-items: center;
+}
+.col-md-12.greeting-message h2 {
+  color: #fff;
+}
+.col-md-12.short-instructions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.col-md-12.short-instructions p {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.3em;
+}
+p.ancor {
+  font-size: 1em !important;
+  font-weight: 400 !important;
+}
+.row.sroft-appt-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 15px 60px;
+  width: 85%;
+  border-radius: 10px;
+}
+.main-banner > .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 120px;
+  padding-bottom: 120px;
+}
+.col-md-9.buttons-after-app-form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40px;
+  gap: 25px;
+}
+.buttons-after-app-form > button {
+  min-width: 25rem;
+  background-color: #26bec7;
+  border: none;
+  color: #ffff;
+  font-weight: 600;
+  padding: 8px;
+  border-radius: 20px;
+}
+
+
+
+  .today {
+    margin-top: 25px;
+    --gray: #636e72;
+    --very-light-gray: #eee;
+    --light-gray: #9098A9;
+    --x-light-gray: #dfe6e9;
+    --gradient: red;
+    color: red;
+  }
+
+  .today label {
+    font-size: 1.35em;
+  }
+
+  /* CORE STYLES */
+  .today input {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    width: 1em;
+    height: 1em;
+    font: inherit;
+    border: 0.1em solid var(--light-gray);
+    margin-bottom: -0.125em;
+  }
+  .todayinput[type=checkbox] {
+    border-radius: 0.25em;
+  }
+  .today input:checked {
+    border-color: transparent;
+    background: var(--gradient) border-box;
+    box-shadow: 0 0 0 0.1em inset #fff;
+  }
+  .today input:not(:checked):hover {
+    border-color: transparent;
+    background: linear-gradient(#fff, #fff) padding-box, var(--gradient) border-box;
+  }
+  input[type="checkbox"]:focus {
+    outline: none !important;
+  }
+
