@@ -158,7 +158,7 @@ function findExtPatientId($patient){
         }
         return $patient;
     } else {
-        return $responseArray['error'];
+        return $responseArray['error'][0];
     }
 }
 function findExtPatient($patient_id){

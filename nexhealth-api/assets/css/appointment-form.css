@@ -127,6 +127,9 @@ form.step-one {
     padding-top: 30px;
     gap: 30px;
 }
+.container {
+  max-width: 100%;
+}
 input#bk-btn, input#btn-ctn {
     border: 1px solid black;
     background-color: #fff;
@@ -778,6 +781,9 @@ input#app-conf {
   min-width: 198px;
   border: none;
 }
+.mobile-calendar-and-filter-holder {
+  display: none;
+}
 td:has(a.datepick-selected):first-child {
   border-bottom-left-radius: 15px;
   overflow: hidden;
@@ -955,4 +961,26 @@ p.ancor {
   input[type="checkbox"]:focus {
     outline: none !important;
   }
-
+  input.is-invalid {
+    border: 1px solid red;
+}
+.error-message {
+  display: none;
+  width: 100%;
+  padding: 15px;
+  border: 2px solid red;
+  border-radius: 10px;
+  background-color: #ff000024;
+}
+.step-topbar{
+  display: none;
+}
+.mobile-label {
+  display: none;
+}
+.input-field {
+  position: relative;
+}
+.buttons-row-mobile{
+  display: none;
+}

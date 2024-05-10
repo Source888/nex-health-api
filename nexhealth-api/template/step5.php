@@ -1,10 +1,15 @@
 <?php
 require_once dirname(__DIR__) . '/classes/Patient.php';
 require_once dirname(__DIR__) . '/classes/Provider.php'; 
-var_dump($_SESSION['patient_id']);
+//var_dump($_SESSION['patient']);
 ?>
+<style>
+        .step-topbar {
+            display: none !important;
+        }
+</style>
 <h2 class="form-title">REVIEW & CONFIRM APPOINTMENT</h2>
-<h4>Click 'Confirm My Appointment' to complete your scheduling</h4>
+<h4 class="hint">Click 'Confirm My Appointment' to complete your scheduling</h4>
 <div class="container">
     <div class="appointment-info">
         <div class="patient-info">
@@ -20,7 +25,12 @@ var_dump($_SESSION['patient_id']);
         </div>
         <div class="additional-info">
             <div class="title-edit-block">
-            <h3>Additional Information</h3>
+                <?php if($body_cont['existing_patient']){ ?>
+                    <h3>Your Information</h3>
+                <?php } else { ?>
+                    
+                    <h3>Additional Information</h3>
+                <?php } ?>
             <a href="javascript:void(0)" class="edit-step" data-step="4">Edit</a>
             </div>
             <div class="additional-info-block">
@@ -76,6 +86,10 @@ var_dump($_SESSION['patient_id']);
     <input type="submit" id="app-conf" value="Confirm My Appointment">
     
 </div>
+<div class="buttons-row-mobile">  
+    <input type="submit" id="app-conf-mb" value="Confirm My Appointment">
+    
+</div>
 <div class="container">
   <div class="row need-help">
     <h3>Need help? Our friendly staff are here to help. Call <a href="tel:(516)565-6565">(516)565-6565</a></h3>
@@ -102,7 +116,7 @@ var_dump($_SESSION['patient_id']);
                 }
             });
         });
-        $('#app-conf').click(function(e){
+        $('#app-conf, #app-conf-mb').click(function(e){
             e.preventDefault();
             var comment = $('#comment').val();
             var step = 'confirm_appointment';

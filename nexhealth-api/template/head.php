@@ -7,6 +7,7 @@
     <!-- Add your CSS files here -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/appointment-form.css">
+    <link rel="stylesheet" href="assets/css/mobile.css">
     <!-- Add your JavaScript files here -->
     
     

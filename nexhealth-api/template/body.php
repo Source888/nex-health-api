@@ -23,6 +23,24 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
             </li>
         </ul>
     </div>
+    <div class="step-topbar">
+        <ul class="steps checklist">
+            <li class="step-item">
+
+                <div class="step-mark <?php if($body_cont['step'] == 1){ echo 'current'; } else if ($body_cont['step'] > 1) { echo 'completed';} ?>"><span class="mark "><?php if($body_cont['step'] <= 1){ echo 1; } else if ($body_cont['step'] > 1) { echo '✔';} ?></span></div><div  class="step-link <?php if($body_cont['step'] == 1){ echo 'current'; } else if ($body_cont['step'] > 1) { echo 'completed';} ?>"><a href="javascript:void(0);">Your Information</a></div>
+            </li>
+            <li class="step-item">
+                <div class="step-mark <?php if($body_cont['step'] == 2){ echo 'current'; } else if ($body_cont['step'] > 2) { echo 'completed';} ?>"><span class="mark"><?php if($body_cont['step'] <= 2){ echo 2; } else if ($body_cont['step'] > 2) { echo '✔';} ?></span></div><div  class="step-link <?php if($body_cont['step'] == 2){ echo 'current'; } else if ($body_cont['step'] > 2) { echo 'completed';} ?>"><a href="javascript:void(0);">Reason for Visit</a></div>
+            </li>
+            <li class="step-item">
+                <div class="step-mark <?php if($body_cont['step'] == 3){ echo 'current'; } else if ($body_cont['step'] > 3) { echo 'completed';} ?>"><span class="mark"><?php if($body_cont['step'] <= 3){ echo 3; } else if ($body_cont['step'] > 3) { echo '✔';} ?></span></div><div  class="step-link <?php if($body_cont['step'] == 3){ echo 'current'; } else if ($body_cont['step'] > 3) { echo 'completed';} ?>"><a href="javascript:void(0);">Date and Time</a></div>
+            </li>
+            <li class="step-item">
+                <div class="step-mark <?php if($body_cont['step'] == 4){ echo 'current'; } else if ($body_cont['step'] > 4) { echo 'completed';} ?>"><span class="mark"><?php if($body_cont['step'] <= 4){ echo 4; } else if ($body_cont['step'] > 4) { echo '✔';} ?></span></div><div  class="step-link <?php if($body_cont['step'] == 4){ echo 'current'; } else if ($body_cont['step'] > 4) { echo 'completed';} ?>"><a href=javascript:void(0);">Additional Information</a></div>
+            </li>
+           
+        </ul>
+    </div>
     <div class="appointment-container">
         <div class="form-block">
         <?php

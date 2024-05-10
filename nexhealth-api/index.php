@@ -7,18 +7,18 @@ session_set_cookie_params(43200);
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Handle POST request
+   
     ob_start();
 
-    // Define your data
+   
     $data_header = [
         'title' => 'Appointment booking form',
-        'description' => 'My Description',
+        'description' => 'Island Dental Associates webbooking form',
         'address' => 'Franklin Squere, NY',
         'phone' => '(516)565-6565',
     ];
 
-    // Make $data available in the included files
+    
     extract($data_header);
 
     include('template/head.php');
@@ -115,10 +115,20 @@ echo $output;
                 
                 
                 $ext_pat_data = findExtPatientId($patient);
-
+                if(is_string($ext_pat_data)){
+                    var_dump($ext_pat_data);
+                    $response = [
+                        'status' => 'error',
+                        'message' => 'Patient with this data not found. Please check the data and try again.',
+                    ];
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
+                }
                
                 $_SESSION['patient_id'] = $ext_pat_data->id;
                 $patient_data = findExtPatient($ext_pat_data->id);
+                $patient->id = $ext_pat_data->id;
                 //var_dump($patient_data);
                 $doctors_arr = getDoctors($patient_data);
                 $_SESSION['doctors_arr'] = $doctors_arr;
@@ -264,6 +274,7 @@ echo $output;
                 
             }
         } else if($step == 'destroy_session'){
+            session_unset();
             session_destroy();
             $response = [
                 'status' => 'success',
@@ -272,20 +283,8 @@ echo $output;
         
         } else if ($step == 'confirm_appointment') {
             if(!$_SESSION["existing_patient"]){
-                if($_SESSION["appointment"] == 'someoneElse'){
-                    $_SESSION['guardian']->provider_id = $_SESSION["pid"][0];
-                
-                
-                    $new_pat = createPatient($_SESSION['guardian']);
-                    if(is_array($new_pat)){
-                        $idStartPos = strpos($new_pat[0], 'id=') + 3;
-                        $id = substr($new_pat[0], $idStartPos);
-                        $id = intval($id);
-                        $_SESSION['patient_id'] = $id;
-                    } else {
-                        $_SESSION['patient_id'] = $new_pat->id;
-                    }
-                } else {
+                if($_SESSION["appointment"] == 'someoneElse' && $_SESSION["parentGuardian"]){
+                    
                     $_SESSION['patient']->provider_id = $_SESSION["pid"][0];
                     $new_pat = createPatient($_SESSION['patient']);
                     //var_dump($new_pat);
@@ -297,9 +296,30 @@ echo $output;
                     } else {
                         $_SESSION['patient_id'] = $new_pat->id;
                     }
+                } else {
+                    $_SESSION['patient']->provider_id = $_SESSION["pid"][0];
+                    $new_pat = createPatient($_SESSION['patient']);
+                    var_dump($new_pat);
+                    //var_dump($new_pat);
+                    if(is_array($new_pat)){
+                        $idStartPos = strpos($new_pat[0], 'id=') + 3;
+                        $id = substr($new_pat[0], $idStartPos);
+                        $id = intval($id);
+                        $_SESSION['patient_id'] = $id;
+                    } else {
+                        $_SESSION['patient_id'] = $new_pat->id;
+                    }
                 }
                 
-            } 
+            } else {
+                if($_SESSION["appointment"] == 'someoneElse' && $_SESSION["parentGuardian"]){
+                    $_SESSION['patient_id'] = $_SESSION['guardian']->id;
+                    
+                } else {
+                    $_SESSION['patient_id'] = $_SESSION['patient']->id;
+                
+                }
+            }
             $comment = $post_data['comment'] ?? '';
             $_SESSION['comment'] = $comment;
             $appointment = new Appointment();
@@ -334,7 +354,14 @@ echo $output;
             } else {
                 $_SESSION['days'] = $startDateAndDays[1];
             }
-           
+            $filter_days = $post_data['days'] ?? null;
+            $filter_hours = $post_data['times'] ?? null;
+            if($filter_hours == 'all'){
+                $filter_hours = null;
+            }
+            
+            $_SESSION['filter_days'] = $filter_days;
+            $_SESSION['filter_hours'] = $filter_hours;
             $ext_pat = $_SESSION["existing_patient"];
             getSlots($ext_pat, $_SESSION['start_date'], $_SESSION['days'], $_SESSION['filter_days'] ?? null, $_SESSION['filter_hours'] ?? null, $_SESSION['show_type'] ?? false);
             $response = [
@@ -359,8 +386,8 @@ echo $output;
         } else if ($step == 'show_type') {
             $show_type = ($post_data['show_type'] == 'dates') ?? false;
             $_SESSION['show_type'] = $show_type;
-            $ext_pat = $_SESSION["existing_patient"];
-            getSlots($ext_pat, $_SESSION['start_date'] ?? null, $_SESSION['days'] ?? null, $_SESSION['filter_days'] ?? null, $_SESSION['filter_hours'] ?? null, $show_type);
+            //$ext_pat = $_SESSION["existing_patient"];
+            //getSlots($ext_pat, $_SESSION['start_date'] ?? null, $_SESSION['days'] ?? null, $_SESSION['filter_days'] ?? null, $_SESSION['filter_hours'] ?? null, $show_type);
             $response = [
                 'status' => 'success',
                 'message' => 'Display type changed',
@@ -452,22 +479,7 @@ function getStartDateAndDays($date_string){
 }
 
 function getSlots($ext_pat, $startDate = null, $Days = null, $filter_days = null, $filter_hours = null, $show_type = false){
-    if($ext_pat && !$show_type){
-        $providers = $_SESSION['doctors_arr'];
-        $ids = array_map(function($provider) {
-            return $provider->id;
-        }, $providers);
-        $_SESSION["providers_ids"] = $ids;
-        foreach ($providers as $provider) {
-            $slots = getAppointmentSlots($provider->id, $_SESSION['app_type_id'], $startDate, $Days);
-            $slots_to_view = getDayTimeSlots($slots, $filter_days, $filter_hours);
-           
-            $provider->appointment_slots = $slots_to_view;
-        }
-        //var_dump($providers);
-        $_SESSION['doctors_arr'] = $providers;
-        return $providers;
-    } else {
+    if(!$ext_pat){
         $providers = getDoctors($_SESSION['app_type_id']);
         $ids = array_map(function($provider) {
             return $provider->id;
@@ -482,6 +494,30 @@ function getSlots($ext_pat, $startDate = null, $Days = null, $filter_days = null
         
         $_SESSION["slots"] = $slots_to_view;
         return $slots_to_view;
+    } else {
+        $providers = $_SESSION['doctors_arr'];
+        $ids = array_map(function($provider) {
+            return $provider->id;
+        }, $providers);
+        $_SESSION["providers_ids"] = $ids;
+        foreach ($providers as $provider) {
+            $slots = getAppointmentSlots($provider->id, $_SESSION['app_type_id'], $startDate, $Days);
+            $slots_to_view = getDayTimeSlots($slots, $filter_days, $filter_hours);
+           
+            $provider->appointment_slots = $slots_to_view;
+        }
+        //var_dump($providers);
+        $_SESSION['doctors_arr'] = $providers;
+        $slots_all = getAppointmentSlots($ids, $_SESSION['app_type_id'], $startDate, $Days);
+        
+        //var_dump($slots);
+        $slots_to_view_all = getDayTimeSlots($slots_all, $filter_days, $filter_hours);
+        ksort($slots_to_view_all);
+        //var_dump($slots_to_view); 
+        
+        $_SESSION["slots"] = $slots_to_view_all;
+        return [$providers, $slots_to_view_all];
+       
     }
     
 }

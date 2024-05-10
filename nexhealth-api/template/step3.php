@@ -19,6 +19,10 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             <input type="radio" id="by-dates" name="show_type" value="dates" <?php if($body_cont['show_type']) { echo 'checked';} ?>>
             <label for="by-dates">Next available</label>
         </div>
+        <div class="mobile-toggler">
+            <span onclick="tabToggle('doc', this)" class="<?php if(!$body_cont['show_type']) { echo 'active';} ?>">By provider</span>
+            <span onclick="tabToggle('dates', this)" class="<?php if($body_cont['show_type']) { echo 'active';} ?>">Next available</span>
+        </div>
         <?php } else { ?>
             <div class="today">
                 <label for="today"> <input type="checkbox" id="today" name="today" value="today">
@@ -35,8 +39,11 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                     <?php if ($provider->appointment_slots && is_array($provider->appointment_slots)){ ?>
                     <div class="provider-block">
                         <div class="provider-info">
-                            <h3><?php echo $provider->first_name; ?> <?php echo $provider->last_name; ?></h3>
-                            <p><?php echo $provider->nexhealth_specialty; ?></p>
+                            <div class="prov-info-txt">
+                                <h3><?php echo $provider->first_name; ?> <?php echo $provider->last_name; ?></h3>
+                                <p><?php echo $provider->nexhealth_specialty; ?></p>
+                            </div>
+                            
                             <div class="provider-img">
                                 <img src="<?php echo $provider->profile_url; ?>" alt="<?php echo $provider->first_name; ?>">
                             </div>
@@ -82,7 +89,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         <div class="blocks container">
             <div class="blocks-wrapper-days">
                 <?php foreach ($body_cont['slots'] as $day => $times) { ?>
-                    <div class="row">
+                    <div class="row blocks-mb">
                         <?php
                         $date = DateTime::createFromFormat('Y-m-d', $day);
                         $day_to_print = $date->format('D, d'); 
@@ -112,6 +119,14 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
       <?php } ?>
 
 </div>
+</div>
+<div class="buttons-row-mobile">  
+      <?php if($body_cont['editing'] === false){ ?>
+          <input type="button" id="bk-btn-mb" value="Back">
+          <input type="submit" id="btn-ctn-mb" value="Continue">
+      <?php } else { ?>
+        <input type="submit" id="btn-ctn-mb" value="Save">
+      <?php } ?>
 </div>
 <div class="container">
   <div class="row need-help">
@@ -150,31 +165,159 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         <button class="filter-apply">Apply</button>
     </div> 
 </div>
+<div class="mobile-calendar-and-filter-holder">
+    <div class="tab-head">
+        
+            <span class="active" onclick="openTab('calendar-tab', this)">Range</span>
+        
+            <span onclick="openTab('filter-tab', this)">Filter</span>
+        
+        
+    </div>
+    <div class="tab-content">
+       <div class="tab-filter" id="calendar-tab"></div>
+       <div class="tab-filter" id="filter-tab">
+        <div class="filter-by-day">
+                <span>Which day work best?</span>
+                <div name="filter-by-day" id="filter-by-day">
+                    <div data-day="Mon" <?php if(is_array($body_cont['filter_days']) && in_array('Mon', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>M</div>
+                    <div data-day="Tue" <?php if(is_array($body_cont['filter_days']) && in_array('Tue', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>T</div>
+                    <div data-day="Wed" <?php if(is_array($body_cont['filter_days']) && in_array('Wed', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>W</div>
+                    <div data-day="Thu" <?php if(is_array($body_cont['filter_days']) && in_array('Thu', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>T</div>
+                    <div data-day="Fri" <?php if(is_array($body_cont['filter_days']) && in_array('Fri', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>F</div>
+                    <div data-day="Sat" <?php if(is_array($body_cont['filter_days']) && in_array('Sat', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>S</div>
+                </div>
+            </div>
+            <div class="filter-by-time">
+                <span>What time of day?</span>
+                <div class="by-time">
+                    <input type="radio" id="all-time" name="filter-by-time" value="ALL">
+                    <label for="all-time">All</label><br>
+                    <input type="radio" id="am-time" name="filter-by-time" value="AM">
+                    <label for="am-time">am</label>
+                    <input type="radio" id="pm-time" name="filter-by-time" value="PM">
+                    <label for="pm-time">pm</label>
+                </div>
+                
+            </div>
+       </div>     
+     </div>
+     <div class="tab-buttons-row">
+        <button class="filter-reset" onclick="setDefaults();">Reset</button>
+        <div></div>
+        <button class="filter-cancel" onclick="hideFilters();">Cancel</button>
+        <button class="filter-apply-mob" onclick="updateView();">Apply</button>
+
+     </div>
+</div>
 </section>
 <script>
     function firstLastBorders(){
         var selectedElements = document.querySelectorAll('a.datepick-selected');
         var firstA = $('a.datepick-selected').first();
         var lastA = $('a.datepick-selected').last();
-        
-        if($('a.datepick-selected').length == 1){
-            firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
-            firstA.parent().css("cssText", "border-radius: 20px;");
+        if(screen.width <= 820) {
+            if($('a.datepick-selected').length == 1){
+                firstA.css("cssText", "border-radius: 5vw;");
+                firstA.parent().css("cssText", "border-radius: 5vw;");
+            } else {
+                firstA.css("cssText", "border-radius: 5vw; background-color: #27c0c8 !important;");
+                firstA.parent().css("cssText", "border-top-left-radius: 5vw; border-bottom-left-radius: 5vw; background-color: #27c0c878 !important;");
+                lastA.css("cssText", "border-radius: 5vw; background-color: #27c0c8 !important;");
+                lastA.parent().css("cssText", "border-top-right-radius: 5vw; border-bottom-right-radius: 5vw; background-color: #27c0c878 !important;");
+            }
         } else {
-            firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
-            firstA.parent().css("cssText", "border-top-left-radius: 20px; border-bottom-left-radius: 20px; background-color: #27c0c878 !important;");
-            lastA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
-            lastA.parent().css("cssText", "border-top-right-radius: 20px; border-bottom-right-radius: 20px; background-color: #27c0c878 !important;");
+            if($('a.datepick-selected').length == 1){
+                firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
+                firstA.parent().css("cssText", "border-radius: 20px;");
+            } else {
+                firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
+                firstA.parent().css("cssText", "border-top-left-radius: 20px; border-bottom-left-radius: 20px; background-color: #27c0c878 !important;");
+                lastA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
+                lastA.parent().css("cssText", "border-top-right-radius: 20px; border-bottom-right-radius: 20px; background-color: #27c0c878 !important;");
+            }
         }
         
+        
+    }
+    function hideFilters(){
+        $('.mobile-calendar-and-filter-holder').css('display', 'none');
+    }
+    function getFormatedDate(date){
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1; // getMonth() returns a zero-based value (0-11)
+        var day = date.getDate();
+
+        // Pad the month and day with leading zeros if necessary
+        if (month < 10) month = '0' + month;
+        if (day < 10) day = '0' + day;
+
+        var formattedDate = year + '-' + month + '-' + day;
+        return formattedDate;
+    }
+    function setDefaults(){
+        var filter_el = '.tab-filter div #filter-by-day div';
+        var time_el = '.tab-filter div input[name="filter-by-time"]';
+        $(filter_el).each(function(){
+            $(this).removeClass('selected');
+        });
+        $(time_el).each(function(){
+            $(this).prop('checked', false);
+        });
+        var date = new Date();
+        date_to_set = getFormatedDate(date);
+        $('#rangePicker').val(date_to_set + ' - ' + date_to_set);
+       
+        updateView();
+    }
+    function openTab(tabToDisplay, elmnt) {
+        var i;
+        var tab_head = document.querySelectorAll('.tab-head span');
+        for (i = 0; i < tab_head.length; i++) {
+            tab_head[i].classList.remove("active");
+        }
+        var x = document.getElementsByClassName("tab-filter");
+
+        for (i = 0; i < x.length; i++) {
+            
+            x[i].style.display = "none";  
+        }
+        elmnt.classList.add("active");
+        document.getElementById(tabToDisplay).style.display = "flex";  
     }
     function initSlides(){
-        $('.slider').slick({
-            slidesToShow: <?php if($body_cont['existing_patient']) { echo 3; } else { echo 5; } ?>,
-            slidesToScroll: 1,
-            centerPadding: '10px',
-            prevArrow: '<button type="button" class="slick-prev">&lt;</button>',
-            nextArrow: '<button type="button" class="slick-next">&gt;</button>'
+        
+        $('.slider').each(function() {
+            var slidesToShow = <?php if($body_cont['existing_patient']) { echo 3; } else { echo 5; } ?>;
+            if(slidesToShow == 5 && screen.width <= 820){
+                slidesToShow = 4;
+            } else if(slidesToShow == 3 && screen.width <= 820){
+                slidesToShow = 4;
+            }
+
+            $(this).slick({
+                slidesToShow: slidesToShow,
+                slidesToScroll: 1,
+                centerPadding: '10px',
+                prevArrow: '<button type="button" class="slick-prev">&lt;</button>',
+                nextArrow: '<button type="button" class="slick-next">&gt;</button>',
+                responsive: [
+                    {
+                        breakpoint: 820,
+                        settings: {
+                            slidesToShow: 4,
+                            slidesToScroll: 1
+                        }
+                    },
+                    {
+                        breakpoint: 480,
+                        settings: {
+                            slidesToShow: 4,
+                            slidesToScroll: 1
+                        }
+                    }
+                ]
+            });
         });
     }
     function updateBlockContainer() {
@@ -206,12 +349,34 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
     function updateView(){
         var date = $('#rangePicker').val();
         var step = 'filter_dates';
+        var days = [];
+        var times = [];
+        $('.mobile-calendar-and-filter-holder').css('display', 'none');
+        if(screen.width <= 820){
+            var filter_el = '.tab-filter div #filter-by-day div';
+            var time_el = '.tab-filter div input[name="filter-by-time"]';
+        } else {
+            var filter_el = '#filter-by-day div';
+            var time_el = 'input[name="filter-by-time"]';
+        }
+        $(filter_el).each(function(){
+            if ($(this).hasClass('selected')) {
+                days.push($(this).data('day'));
+            }
+        });
+        $(time_el).each(function(){
+            if ($(this).is(':checked')) {
+                times.push($(this).val());
+            }
+        });
         $.ajax({
             url: 'index.php',
             type: 'POST',
             data: {
                 date: date,
-                step: step
+                step: step,
+                days: days,
+                times: times
             },
             success: function(response){
                 if (response.status == 'success') {
@@ -221,54 +386,55 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             }
         });
     }
-var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body_cont['end_date']) ) { echo "{$body_cont['start_date']} - {$body_cont['end_date']}";}?>';
-
- $('#rangePicker').datepick({ 
-    rangeSelect: true,
-    prevText: '<',
-    nextText: '>',
-    todayText: '',
-    rangeSeparator: ' - ',
-    
-    onShow: function() {
-        firstLastBorders();
+    function moveFilterToTab(){
+        var filter_el = $('.filter-popup-content');
+        var tab_el = $('.tab-filter');
+        tab_el.append(filter_el);
+    }
+    function backFilter(){
+        var filter_el = $('.filter-popup-content');
+        var filter_popup = $('.filter-popup');
+        filter_popup.append(filter_el);
+    }
+    function viewToggle(type){
+        var step = 'show_type';
+            $.ajax({
+                url: 'index.php',
+                type: 'POST',
+                data: {
+                    show_type: type,
+                    step: step
+                },
+                success: function(response){
+                    if (response.status == 'success') {
+                        updateBlockContainer();
+                    }
+                    console.log(response);
+                }
+            });
+    }
+    function tabToggle(type, element){
+        $('.mobile-toggler span').removeClass('active');
+        element.classList.add('active');
         
-        
-    },
-    clearText: 'Reset',
-    closeText: 'Apply',
-    changeMonth: false,
-    changeYear: false,
-    onClose: function() {
-        
-        if(typeof $('#rangePicker').val() == undefined || date_string != $('#rangePicker').val()){
-            date_string = $('#rangePicker').val();
-            updateView();
-        }
-        
-    },
-    });
-    $(document).ready(function(){
-        initSlides();
-        
-        $(document).on('click', '.slot-block', function(e){
-            $('.slot-block').removeClass('selected');
-            $(this).addClass('selected');
-        });
-        $(document).on('click', 'tr td a', function(){
-            firstLastBorders();
-        
-        });
-        $(document).on('click', '.filter-apply', function(e){
-            e.preventDefault();
+        viewToggle(type);
+    }
+    function filterApply(){
             var days = [];
             var times = [];
-            $('#filter-by-day div').each(function(){
+            if(screen.width <= 820){
+                var filter_el = '.tab-filter div #filter-by-day div';
+                var time_el = '.tab-filter div input[name="filter-by-time"]';
+            } else {
+                var filter_el = '#filter-by-day div';
+                var time_el = 'input[name="filter-by-time"]';
+            }
+            $(filter_el).each(function(){
                 if ($(this).hasClass('selected')) {
                     days.push($(this).data('day'));
                 }
             });
-            $('input[name="filter-by-time"]').each(function(){
+            $(time_el).each(function(){
                 if ($(this).is(':checked')) {
                     times.push($(this).val());
                 }
@@ -286,27 +452,110 @@ var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body
                     if (response.status == 'success') {
                         location.reload();
                     }
-                    console.log(response);
+                    updateView();
                 }
             });
+    }
+var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body_cont['end_date']) ) { echo "{$body_cont['start_date']} - {$body_cont['end_date']}";}?>';
+if(screen.width <= 820){
+    var cont_to_view = '.mobile-calendar-and-filter-holder .tab-content #calendar-tab';
+$('#calendar-tab').datepick({ 
+    rangeSelect: true,
+    prevText: '<',
+    nextText: '>',
+    todayText: '',
+    rangeSeparator: ' - ',
+    onSelect: function(dates) {
+        date_start = getFormatedDate(dates[0]);
+        date_end = getFormatedDate(dates[1]);;
+        $('#rangePicker').val(date_start + ' - ' + date_end);
+        
+    },
+    onShow: function() {
+        firstLastBorders();
+        
+        
+        
+        
+    },
+    clearText: 'Reset',
+    closeText: 'Apply',
+    changeMonth: false,
+    changeYear: false,
+    popupContainer: cont_to_view,
+    onClose: function() {
+        
+        
+        if(typeof $('#rangePicker').val() == undefined || date_string != $('#rangePicker').val()){
+            date_string = $('#rangePicker').val();
+            updateView();
+        }
+        
+    },
+    });
+} else {
+    var cont_to_view = 'body';
+    $('#rangePicker').datepick({ 
+    rangeSelect: true,
+    prevText: '<',
+    nextText: '>',
+    todayText: '',
+    rangeSeparator: ' - ',
+    
+    onShow: function() {
+        firstLastBorders();
+        
+        
+        
+        
+    },
+    clearText: 'Reset',
+    closeText: 'Apply',
+    changeMonth: false,
+    changeYear: false,
+    popupContainer: cont_to_view,
+    onClose: function() {
+        
+        
+        if(typeof $('#rangePicker').val() == undefined || date_string != $('#rangePicker').val()){
+            date_string = $('#rangePicker').val();
+            updateView();
+        }
+        
+    },
+    });
+}
+ 
+    
+    $(document).ready(function(){
+        initSlides();
+        if(screen.width <= 820){
+            $('#rangePicker').on('click', function(){
+                if($('.mobile-calendar-and-filter-holder').css('display') == 'block'){
+                    
+                    $('.mobile-calendar-and-filter-holder').css('display', 'none');
+                } else {
+                   
+                    $('.mobile-calendar-and-filter-holder').css('display', 'block');
+                }
+                
+            });
+        }
+        $(document).on('click', '.slot-block', function(e){
+            $('.slot-block').removeClass('selected');
+            $(this).addClass('selected');
+        });
+        $(document).on('click', 'tr td a', function(){
+            firstLastBorders();
+        
+        });
+        $(document).on('click', '.filter-apply', function(e){
+            e.preventDefault();
+            filterApply();
         });
         $(document).on('click', '.toggler input', function(){
             var show_type = $('input[name="show_type"]:checked').val();
-            var step = 'show_type';
-            $.ajax({
-                url: 'index.php',
-                type: 'POST',
-                data: {
-                    show_type: show_type,
-                    step: step
-                },
-                success: function(response){
-                    if (response.status == 'success') {
-                        updateBlockContainer();
-                    }
-                    console.log(response);
-                }
-            });
+            viewToggle(show_type);
         });
     $(document).on('click', '#filter-by-day div', function(e){
         
@@ -329,11 +578,11 @@ var date_string = '<?php if(!is_null($body_cont['start_date']) && !is_null($body
             updateView();
         }
     });
-    $(document).on('click', '#bk-btn', function(e){
+    $(document).on('click', '#bk-btn, #bk-btn-mb', function(e){
         e.preventDefault();
         window.location.href = 'index.php?step=2';
     });
-    $(document).on('click', '#btn-ctn', function(e){
+    $(document).on('click', '#btn-ctn, #btn-ctn-mb', function(e){
         e.preventDefault();
         var date_time = $('.slot-block.selected span').data('full-time');
         var time = $('.slot-block.selected span').text();

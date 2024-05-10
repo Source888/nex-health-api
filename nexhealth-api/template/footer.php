@@ -12,6 +12,7 @@
         $('#loader-overlay').hide();
     });
 });
+var timeoutId = 0;
 window.onbeforeunload = function() {
     timeoutId = setTimeout(function() {
     var step = 'session_destroy';

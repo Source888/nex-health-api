@@ -70,7 +70,7 @@ $(selector).datepick({minDate: 0, maxDate: '+1m +1w'}) */
 			weekHeader: '<tr>{days}</tr>',
 			dayHeader: '<th>{day}</th>',
 			week: '<tr>{days}</tr>',
-			day: '<td>{day}</td>',
+			day: '<td><div class="day-wrap">{day}</div></td>',
 			monthSelector: '.datepick-month',
 			daySelector: 'td',
 			rtlClass: 'datepick-rtl',

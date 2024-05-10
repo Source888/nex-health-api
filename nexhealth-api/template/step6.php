@@ -1,4 +1,9 @@
 <div class = "main-banner">
+    <style>
+        body {
+           background-color: transparent !important;
+        }
+    </style>
     <div class = "container">
         <div class = "row">
             <div class = "col-md-12">
@@ -45,6 +50,10 @@
                
                 <?php } ?>
             </div>
+            <div class = "mobil-copy">
+                <img src="/nexhealth-api/assets/img/copy.png" alt="copy-icon">
+                <p>Copy to Clipboard</p>
+            </div>
         </div>
         <div class="row">
             <div class = "col-md-9 buttons-after-app-form">
@@ -56,7 +65,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/clipboard.js/1.5.12/clipboard.min.js"></script>
 <script>
-    new Clipboard('#copy-to-cb', {
+    new Clipboard('#copy-to-cb, .mobil-copy p', {
         text: function(trigger) {
             var text = $('.sroft-appt-info').text();
             text = text.replace(/\s\s+/g, ' ').trim();

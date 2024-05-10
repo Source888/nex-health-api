@@ -51,6 +51,14 @@
       <?php } ?>
     
 </div>
+<div class="buttons-row-mobile">  
+      <?php if($body_cont['editing'] === false){ ?>
+          <input type="button" id="bk-btn-mb" value="Back">
+          <input type="submit" id="btn-ctn-mb" value="Continue">
+      <?php } else { ?>
+        <input type="submit" id="btn-ctn-mb" value="Save">
+      <?php } ?>
+</div>
 <div class="container">
   <div class="row need-help">
     <h3>Need help? Our friendly staff are here to help. Call <a href="tel:(516)565-6565">(516)565-6565</a></h3>
@@ -67,11 +75,14 @@
         
     }
     $(document).ready(function(){
-        
+        $('#bk-btn, #bk-btn-mb').click(function(e){
+            e.preventDefault();
+            window.location.href = 'index.php?step=3';
+        });
         $('input[name="appointment"]').change(function(){
             toggleOtherPatBlock();
         });
-        $('#btn-ctn').click(function(){
+        $('#btn-ctn, #btn-ctn-mb').click(function(){
             var insurance = $('input[name="insurance"]:checked').val();
             var appointment = $('input[name="appointment"]:checked').val();
             var fname = $('#patient-fname').val();
