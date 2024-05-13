@@ -1,16 +1,7 @@
 <?php
 require_once 'classes/Patient.php';
 require_once 'classes/Provider.php';
-$prod = false;
-if($prod === true){
-    $GLOBALS['subdomain'] = 'island-dental-associates';
-    $GLOBALS['location_id'] = 19226;
-    $GLOBALS['api_token'] = 'aXNsYW5kLWRlbnRhbC1hc3NvYw.qE4eYXuMGt5PiTW_LKEq6-y2Ngc-pRey';
-} else {
-    $GLOBALS['subdomain'] = 'island-dental-associates-sandbox';
-    $GLOBALS['location_id'] = 119742;
-    $GLOBALS['api_token'] = 'aXNsYW5kLWRlbnRhbC1hc3NvYy1zYW5kYm94.7cPCG59VSZbD0kKiX4_HRJA0V4ZWKiMy';
-}
+require_once 'settings.php';
 
 function getBearerToken() {
 
@@ -99,8 +90,8 @@ function getDoctors($patient = null) {
             $provider->nexhealth_specialty = $doctor['nexhealth_specialty'];
             $provider->profile_url = $doctor['profile_url'];
             $provider->provider_requestables = $doctor['provider_requestables'];
-            $provider->availabilities = $doctor['availabilities'];
-            $provider->appointment_slots = $doctor['appointment_slots'];
+            $provider->availabilities = $doctor['availabilities'] ?? null;
+            $provider->appointment_slots = $doctor['appointment_slots'] ?? null;
             $provider->nexhealth_specialty = ($doctor['nexhealth_specialty'] == "Unknown") ? "" : $doctor['nexhealth_specialty'];
             if(!is_null($patient) && $patient->last_visited_provider_id == $provider->id){
                 $provider->last_visited = true;

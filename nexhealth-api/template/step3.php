@@ -25,7 +25,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         </div>
         <?php } else { ?>
             <div class="today">
-                <label for="today"> <input type="checkbox" id="today" name="today" value="today">
+                <label for="today"> <input type="checkbox" id="today" name="today" value="today" <?php if($body_cont['start_date'] == $body_cont['end_date']) { echo 'checked';} ?>>
                 Today</label> 
             </div>
     <?php } ?>
@@ -136,6 +136,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
 <div class="filter-popup">
     <span class="close-filter-popup">✕</span>
     <div class="filter-popup-content">
+
         <h3>Filter by</h3>
         <div class="filter-by-day">
             <span>Which day work best?</span>
@@ -177,6 +178,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
     <div class="tab-content">
        <div class="tab-filter" id="calendar-tab"></div>
        <div class="tab-filter" id="filter-tab">
+        <div class="filter-tab-content-wrapper">
         <div class="filter-by-day">
                 <span>Which day work best?</span>
                 <div name="filter-by-day" id="filter-by-day">
@@ -191,14 +193,15 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             <div class="filter-by-time">
                 <span>What time of day?</span>
                 <div class="by-time">
-                    <input type="radio" id="all-time" name="filter-by-time" value="ALL">
-                    <label for="all-time">All</label><br>
-                    <input type="radio" id="am-time" name="filter-by-time" value="AM">
-                    <label for="am-time">am</label>
-                    <input type="radio" id="pm-time" name="filter-by-time" value="PM">
-                    <label for="pm-time">pm</label>
+                    <input type="radio" id="all-time-mb" name="filter-by-time" value="ALL">
+                    <label for="all-time-mb" class="by-time-mb">All</label><br>
+                    <input type="radio" id="am-time-mb" name="filter-by-time" value="AM">
+                    <label for="am-time-mb" class="by-time-mb">am</label>
+                    <input type="radio" id="pm-time-mb" name="filter-by-time" value="PM">
+                    <label for="pm-time-mb" class="by-time-mb">pm</label>
                 </div>
                 
+            </div>
             </div>
        </div>     
      </div>
@@ -478,6 +481,7 @@ $('#calendar-tab').datepick({
         
         
     },
+    minDate: new Date(),
     clearText: 'Reset',
     closeText: 'Apply',
     changeMonth: false,
@@ -509,6 +513,7 @@ $('#calendar-tab').datepick({
         
         
     },
+    minDate: new Date(),
     clearText: 'Reset',
     closeText: 'Apply',
     changeMonth: false,
@@ -529,6 +534,13 @@ $('#calendar-tab').datepick({
     
     $(document).ready(function(){
         initSlides();
+        $('.by-time label').click(function() {
+            var radioButtonId = $(this).attr('for');
+            $('.by-time input[type=radio]').prop('checked', false);
+            $('#' + radioButtonId).prop('checked', true);
+        });
+
+
         if(screen.width <= 820){
             $('#rangePicker').on('click', function(){
                 if($('.mobile-calendar-and-filter-holder').css('display') == 'block'){

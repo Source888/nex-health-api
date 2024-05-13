@@ -116,7 +116,7 @@ echo $output;
                 
                 $ext_pat_data = findExtPatientId($patient);
                 if(is_string($ext_pat_data)){
-                    var_dump($ext_pat_data);
+                    //var_dump($ext_pat_data);
                     $response = [
                         'status' => 'error',
                         'message' => 'Patient with this data not found. Please check the data and try again.',
@@ -299,7 +299,7 @@ echo $output;
                 } else {
                     $_SESSION['patient']->provider_id = $_SESSION["pid"][0];
                     $new_pat = createPatient($_SESSION['patient']);
-                    var_dump($new_pat);
+                    
                     //var_dump($new_pat);
                     if(is_array($new_pat)){
                         $idStartPos = strpos($new_pat[0], 'id=') + 3;
@@ -440,9 +440,9 @@ function getDayTimeSlots($slots_array, $filter_days = null, $filter_hours = null
                             
                         }
                         $newSlots[$date][$slot['time']] = [
-                            'pid' => (!is_null($oldPid)) ? $oldPid.','.$slots['pid'] : $slots['pid'],
+                            'pid' => (isset($oldPid)  && !is_null($oldPid)) ? $oldPid.','.$slots['pid'] : $slots['pid'],
                             'time' => strtolower($time),
-                            'operatory_id' => (!is_null($oldOid)) ? $oldOid.','.$slot['operatory_id'] : $slot['operatory_id'],
+                            'operatory_id' => (isset($oldOid) && !is_null($oldOid)) ? $oldOid.','.$slot['operatory_id'] : $slot['operatory_id'],
                             'full_time' => $slot['time'],
                         ];
                     } 
