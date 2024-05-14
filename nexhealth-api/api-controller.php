@@ -14,8 +14,8 @@ function getBearerToken() {
     }
     
     
-    $bearer_token = $token_date_time[0];
-    $date_time = isset($token_date_time[1]) ? $token_date_time[1] : null;
+    
+    $date_time = isset($token_date_time[1]) ? $token_date_time[1] : false;
     if(!$date_time || $now->diff(new DateTime($date_time))->m > 50) {
         $url = 'https://nexhealth.info/authenticates';
         
@@ -50,11 +50,11 @@ function getBearerToken() {
             $bearer_token = $responseArray['data']['token'];
             file_put_contents('token.file', $bearer_token . "\n" . $dateString);
         } 
-        return $bearer_token;
+        
     } else {
-        return $bearer_token;
+        $bearer_token = $token_date_time[0];
     }
-    
+    return $bearer_token;
 }
 function getDoctors($patient = null) {
     $url = "https://nexhealth.info/providers?subdomain={$GLOBALS['subdomain']}&location_id={$GLOBALS['location_id']}&include[]=appointment_types&per_page=70";

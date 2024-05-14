@@ -28,7 +28,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
       </div>
     </div>
     
-    <div class="radio-block">
+    <div class="radio-block row">
       <div class="row">
         <div class="col-md-6">
        
@@ -41,7 +41,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
           <div class="form-check">
             
             
-            <input class="form-check-input" type="radio" name="existed_patient" id="new_patient" value="false">
+            <input class="form-check-input" type="radio" name="existed_patient" id="new_patient" value="false" <?php if(!$body_cont['existed_patient']) { echo 'checked';} ?>>
             <label class="radio" for="new_patient">
             New patient
             </label>
@@ -49,7 +49,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
           <div class="form-check">
           
          
-            <input class="form-check-input" type="radio" name="existed_patient" id="existed_patient" value="true">
+            <input class="form-check-input" type="radio" name="existed_patient" id="existed_patient" value="true" <?php if($body_cont['existed_patient']) { echo 'checked';} ?>>
             <label class="radio" for="existed_patient">
             Existing patient
             </label>
@@ -64,9 +64,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
     </div>
     
     <div class="form-row row">
-      <div class = "error-message">
-        <span class="error">Please fill out all required fields</span>
-      </div>
+      
       <div class="buttons-row">  
         <?php if($body_cont['editing'] === false){ ?>
             <input type="button" id="bk-btn" value="Back">
@@ -94,11 +92,33 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
 </div>
 <script>
   function clearErrors(){
-        $('#fname').removeClass('is-invalid');
-        $('#lname').removeClass('is-invalid');
-        $('#email').removeClass('is-invalid');
-        $('#phone').removeClass('is-invalid');
-        $('.error-message').fadeOut();
+        $('.is-invalid').removeClass('is-invalid');
+        $('.error-text').remove();
+        
+    }
+    function showError(element, error_text){
+        
+        error_element = '<span class="error-text">'+error_text+'</span>';
+        element.parent().append(error_element);  
+        
+    }
+    function validateEmail(email) {
+        var re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    }
+    function validatePhone(phone) {
+        var re = /^\d{10}$/;
+        return re.test(phone);
+    }
+    function validateDOB(dob) {
+      var dobDate = new Date(dob);
+      var currentDate = new Date();
+
+      
+      dobDate.setHours(0, 0, 0, 0);
+      currentDate.setHours(0, 0, 0, 0);
+
+      return dobDate <= currentDate;
     }
   function toggleDOBBlock(){
         var ex_p = $('input[name="existed_patient"]:checked').val();
@@ -107,6 +127,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
             $('#dob').attr('required', 'required');
         }else{
             $('.dob-field').fadeOut();
+            $('#dob').val('');
             $('#dob').removeAttr('required');
         }
         
@@ -142,17 +163,31 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
             var after_edit = <?php if($body_cont['editing']){ echo 'true'; } else { echo 'false'; } ?>;
             if(fname == '' ) {
               $('#fname').addClass('is-invalid');
+              showError($('#fname'), 'First Name is required!');
               have_error = true;
             }
             if(lname == '' ) {
+              showError($('#lname'), 'Last Name is required!');
               $('#lname').addClass('is-invalid');
               have_error = true;
             }
-            if(email == '' ) {
+            if(email == '') {
+              showError($('#email'), 'Email is required!');
+              $('#email').addClass('is-invalid');
+              have_error = true;
+            }
+            if(!validateEmail(email)){
+              showError($('#email'),'Please enter a valid email address');
               $('#email').addClass('is-invalid');
               have_error = true;
             }
             if(phone == '' ) {
+              showError($('#phone'),'Phone Number is required!');
+              $('#phone').addClass('is-invalid');
+              have_error = true;
+            }
+            if(!validatePhone(phone)){
+              showError($('#phone'), 'Please enter a valid phone number');
               $('#phone').addClass('is-invalid');
               have_error = true;
             }
@@ -162,6 +197,16 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
                 var dob = $('#dob').val();
             } else {
                 var dob = '';
+            }
+            if(existed_patient == 'false' && dob == ''){
+                showError($('#dob'), 'Date of Birth is required!');
+                $('#dob').addClass('is-invalid');
+                have_error = true;
+            }
+            if(!validateDOB(dob) && dob != ''){
+              showError($('#dob'), 'Please enter a valid date of birth');
+              $('#dob').addClass('is-invalid');
+              have_error = true;
             }
             if(!have_error){
               $.ajax({
@@ -193,10 +238,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
                     console.log(response);
                 }
               });
-            } else {
-              $('.error-message').fadeIn();
-              $('.error-message .error').text('Please fill out all required fields!');
-            }
+            } 
         });
     });
     

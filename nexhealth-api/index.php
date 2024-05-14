@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
        $step = $_GET['step'];
        $body_cont = [
                 'step' => $step,
+                'existed_patient' => $_SESSION["existing_patient"] ?? false,
                 'editing' => $_SESSION['editing'] ?? false,
                 'patient' => $_SESSION['patient'] ?? null,
                 'slots' => $_SESSION["slots"] ?? null,
@@ -57,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         $body_cont = [
             'step' =>$step ?? 1,
+            'existed_patient' => $_SESSION["existing_patient"] ?? false,
             'patient' => $_SESSION['patient'] ?? null,
             'editing' => $_SESSION['editing'] ?? false,
             'slots' => $_SESSION["slots"] ?? null,
@@ -93,7 +95,7 @@ echo $output;
     if (isset($post_data['step'])) {
         $step = $post_data['step'];
         $_SESSION['step'] = $step;
-        $after_edit = ($post_data['after_edit'] == 'true') ? true : false;
+        $after_edit = (isset($post_data['after_edit']) && $post_data['after_edit'] == 'true') ? true : false;
         /* Step 1 */
         if ($step == 1) {
             $fname = $post_data['fname'];
@@ -184,8 +186,12 @@ echo $output;
                     $provider->appointment_slots = $slots_to_view;
                 }
                 $_SESSION['doctors_arr'] = $providers;
+                $slots_all = getAppointmentSlots($ids, $app_type_id);
+                $slots_all = getDayTimeSlots($slots_all);
+                ksort($slots_all);
+                $_SESSION["slots"] = $slots_all;
             } else {
-                $providers = getDoctors($app_type_id);
+                $providers = getDoctors();
                 $ids = array_map(function($provider) {
                     return $provider->id;
                 }, $providers);
@@ -352,7 +358,7 @@ echo $output;
             if($_SESSION['start_date'] == $_SESSION['end_date']){
                 $_SESSION['days'] = 1;
             } else {
-                $_SESSION['days'] = $startDateAndDays[1];
+                $_SESSION['days'] = $startDateAndDays[1]+1;
             }
             $filter_days = $post_data['days'] ?? null;
             $filter_hours = $post_data['times'] ?? null;
@@ -480,7 +486,7 @@ function getStartDateAndDays($date_string){
 
 function getSlots($ext_pat, $startDate = null, $Days = null, $filter_days = null, $filter_hours = null, $show_type = false){
     if(!$ext_pat){
-        $providers = getDoctors($_SESSION['app_type_id']);
+        $providers = getDoctors();
         $ids = array_map(function($provider) {
             return $provider->id;
         }, $providers);

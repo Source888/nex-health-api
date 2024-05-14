@@ -100,6 +100,10 @@
         padding: 0;
         max-width: 100%;
     }
+    .appointment-container > div > div.container {
+        max-width: 100%;
+        width: 100%;
+    }
     section.appointment-slots {
         max-width: 100%;
     }
@@ -339,7 +343,7 @@
     .blocks-wrapper {
         gap: 10px;
     }
-    .text-inputs input.form-control {
+    .text-inputs input.form-control, .text-inputs > div {
         max-width: 100%;
     }
     h4.hint {
@@ -426,6 +430,9 @@
     }
     .mobil-copy img {
         width: 5vw;
+    }
+    .mobil-copy {
+        display: block;
     }
     .toggler {
         display: none;

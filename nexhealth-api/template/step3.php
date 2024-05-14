@@ -68,7 +68,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                                             <h3 class="slot-day"><?php echo $day_to_print; ?></h3>
                                             <div class="slots-wrapper slider">
                                                 <?php foreach ($slot as $time) { ?>
-                                                    <div class="slot-block">
+                                                    <div class="slot-block  <?php if ((!is_null($body_cont['full_time']) && $body_cont['full_time'] == $time['full_time']) && (!is_null($body_cont['pid']) && in_array($body_cont['pid'], explode(",",$time['pid'])))) { echo "selected"; } ?>">
                                                         <span data-operatory-id="<?php echo $time['operatory_id'] ?>" data-full-time="<?php echo $time['full_time'] ?>" data-pid="<?php echo $time['pid'] ?>"><?php echo $time['time']; ?></span>
                                                     </div>
                                                 <?php } ?>
@@ -97,7 +97,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
                         <span class="slot-day"><?php echo $day_to_print; ?></span>
                         <div class="slots-wrapper slider">
                             <?php foreach ($times as $time) { ?>
-                                <div class="slot-block">
+                                <div class="slot-block <?php if (!is_null($body_cont['full_time']) && $body_cont['full_time'] == $time['full_time']) { echo "selected"; } ?>">
                                     <span data-operatory-id="<?php echo $time['operatory_id'] ?>" data-full-time="<?php echo $time['full_time'] ?>" data-pid="<?php echo $time['pid'] ?>"><?php echo $time['time']; ?></span>
                                 </div>
                             <?php } ?>
@@ -108,7 +108,9 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         </div>
         <?php } ?>
 <?php } ?>
-
+<div class = "error-message">
+                <span class="error">Please fill out all required fields</span>
+        </div>
 <div class="buttons-row">  
 
       <?php if($body_cont['editing'] === false){ ?>
@@ -215,6 +217,13 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
 </div>
 </section>
 <script>
+    function showError(error_text){
+                $('.error-message').fadeIn();
+                $('.error').text(error_text);
+        }
+        function clearErrors(){
+                $('.error-message').fadeOut();
+        }
     function firstLastBorders(){
         var selectedElements = document.querySelectorAll('a.datepick-selected');
         var firstA = $('a.datepick-selected').first();
@@ -291,12 +300,16 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
     function initSlides(){
         
         $('.slider').each(function() {
-            var slidesToShow = <?php if($body_cont['existing_patient']) { echo 3; } else { echo 5; } ?>;
-            if(slidesToShow == 5 && screen.width <= 820){
-                slidesToShow = 4;
-            } else if(slidesToShow == 3 && screen.width <= 820){
-                slidesToShow = 4;
+            var existing_pat = <?php if($body_cont['existing_patient']) { echo 'true'; } else { echo 'false'; } ?>;
+            if(existing_pat && $('input[name="show_type"]:checked').val() == 'doc'){
+                var slidesToShow = 3;
+            } else {
+                var slidesToShow = 5;
             }
+            
+            if(screen.width <= 820){
+                slidesToShow = 4;
+            } 
 
             $(this).slick({
                 slidesToShow: slidesToShow,
@@ -492,6 +505,9 @@ $('#calendar-tab').datepick({
         
         if(typeof $('#rangePicker').val() == undefined || date_string != $('#rangePicker').val()){
             date_string = $('#rangePicker').val();
+            if(typeof $('#today') != undefined && $('#today').is(':checked')){
+                $('#today').prop('checked', false);
+            }
             updateView();
         }
         
@@ -500,6 +516,9 @@ $('#calendar-tab').datepick({
 } else {
     var cont_to_view = 'body';
     $('#rangePicker').datepick({ 
+    selectDefaultDate: true,
+    defaultDate: new Date(),
+    
     rangeSelect: true,
     prevText: '<',
     nextText: '>',
@@ -513,6 +532,7 @@ $('#calendar-tab').datepick({
         
         
     },
+
     minDate: new Date(),
     clearText: 'Reset',
     closeText: 'Apply',
@@ -524,6 +544,9 @@ $('#calendar-tab').datepick({
         
         if(typeof $('#rangePicker').val() == undefined || date_string != $('#rangePicker').val()){
             date_string = $('#rangePicker').val();
+            if(typeof $('#today') != undefined && $('#today').is(':checked')){
+                $('#today').prop('checked', false);
+            }
             updateView();
         }
         
@@ -596,6 +619,10 @@ $('#calendar-tab').datepick({
     });
     $(document).on('click', '#btn-ctn, #btn-ctn-mb', function(e){
         e.preventDefault();
+        if($('.slot-block.selected') == undefined || $('.slot-block.selected').length == 0){
+            showError('Please select appointment time');
+            return;
+        }
         var date_time = $('.slot-block.selected span').data('full-time');
         var time = $('.slot-block.selected span').text();
         var day = $('.slot-block.selected').parent().parent().parent().parent().find('.slot-day').text();

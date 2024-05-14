@@ -1783,10 +1783,11 @@ $.datepick.newDate(2014, 12, 25) */
 			var inst = this._getInst(elem);
 			if (!$.isEmptyObject(inst)) {
 				inst.selectedDates = [];
-				this.hide(elem);
+				//this.hide(elem);
 				var defaultDate = inst.get('defaultDate');
 				if (inst.options.selectDefaultDate && defaultDate) {
 					this.setDate(elem, plugin.newDate(defaultDate || plugin.today()));
+					firstLastBorders();
 				}
 				else {
 					this._updateInput(elem);

@@ -21,11 +21,12 @@
         </div>
         <div class="form-group other-pat" <?php if(is_null($body_cont['for_who_app']) || $body_cont['for_who_app'] == 'me' ){ echo 'style="display:none;"';} ?>>
             <div class="text-inputs">
-                <input class="form-control" type="text" id="patient-fname" name="fname" placeholder="Patient first name*" required>
+                <div><input class="form-control" type="text" id="patient-fname" name="fname" placeholder="Patient first name*" required></div>
                 
-                <input class="form-control" type="text" id="patient-lname" name="lname" placeholder="Patient last name*" required>
+                <div><input class="form-control" type="text" id="patient-lname" name="lname" placeholder="Patient last name*" required></div>
                 
-                <input class="form-control" type="text" id="patient-dob" name="dob" placeholder="Patient data of birth*" required>  
+                <div><input class="form-control" type="text" id="patient-dob" name="dob" placeholder="Patient data of birth*" required></div>
+                
             </div> 
             <div class="form-group parent-guardian">
                 
@@ -42,7 +43,7 @@
     </form>
 </div>
 <div class="buttons-row">  
-  
+      
       <?php if($body_cont['editing'] === false){ ?>
           <input type="button" id="bk-btn" value="Back">
           <input type="submit" id="btn-ctn" value="Continue">
@@ -74,6 +75,17 @@
         }
         
     }
+    function clearErrors(){
+        $('.is-invalid').removeClass('is-invalid');
+        $('.error-text').remove();
+        
+    }
+    function showError(element, error_text){
+        
+        error_element = '<span class="error-text">'+error_text+'</span>';
+        element.parent().append(error_element);  
+        
+    }
     $(document).ready(function(){
         $('#bk-btn, #bk-btn-mb').click(function(e){
             e.preventDefault();
@@ -83,6 +95,7 @@
             toggleOtherPatBlock();
         });
         $('#btn-ctn, #btn-ctn-mb').click(function(){
+            clearErrors();
             var insurance = $('input[name="insurance"]:checked').val();
             var appointment = $('input[name="appointment"]:checked').val();
             var fname = $('#patient-fname').val();
@@ -92,28 +105,34 @@
             var parentGuardian = $('input[name="parent-guardian"]:checked').val();
             var error = false;
             if(insurance == undefined){
-                alert('Please select if you have dental insurance');
+                $('input[name="insurance"]').addClass('is-invalid');
+                showError($('input[name="insurance"]'), 'Please select if you have dental insurance');
                 error = true;
             }
             if(appointment == undefined){
-                alert('Please select who you are scheduling this appointment for');
+                $('input[name="appointment"]').addClass('is-invalid');
+                showError($('input[name="appointment"]'), 'Please select who you are scheduling this appointment for');
                 error = true;
             }
             if(appointment == 'someoneElse'){
                 if(fname == ''){
-                    alert('Please enter patient first name');
+                    $('#patient-fname').addClass('is-invalid');
+                    showError($('#patient-fname'), 'Please enter patient first name');
                     error = true;
                 }
                 if(lname == ''){
-                    alert('Please enter patient last name');
+                    $('#patient-lname').addClass('is-invalid');
+                    showError($('#patient-lname'), 'Please enter patient last name');
                     error = true;
                 }
                 if(dob == ''){
-                    alert('Please enter patient date of birth');
+                    $('#patient-dob').addClass('is-invalid');
+                    showError($('#patient-dob'), 'Please enter patient date of birth');
                     error = true;
                 }
-                if(parentGuardian == undefined){
-                    alert('Please select if you are the parent or legal guardian of the patient');
+                if(parentGuardian == undefined || parentGuardian == ''){
+                    $('input[name="parent-guardian"]').addClass('is-invalid');
+                    showError($('input[name="parent-guardian"]'), 'Please select if you are the parent or legal guardian of the patient');
                     error = true;
                 }
             }
