@@ -32,7 +32,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
       <div class="row">
         <div class="col-md-6">
        
-          <h4>New or Existing Patient?</h4>
+          <h4 class="above-label">New or Existing Patient?</h4>
         </div>
       </div>
       <div class="form-row row">
@@ -41,7 +41,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
           <div class="form-check">
             
             
-            <input class="form-check-input" type="radio" name="existed_patient" id="new_patient" value="false" <?php if(!$body_cont['existed_patient']) { echo 'checked';} ?>>
+            <input class="form-check-input" type="radio" name="existed_patient" id="new_patient" value="false" <?php if(!$body_cont['existed_patient'] && $body_cont['existed_patient'] != 'not_set') { echo 'checked';} ?>>
             <label class="radio" for="new_patient">
             New patient
             </label>
@@ -49,7 +49,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
           <div class="form-check">
           
          
-            <input class="form-check-input" type="radio" name="existed_patient" id="existed_patient" value="true" <?php if($body_cont['existed_patient']) { echo 'checked';} ?>>
+            <input class="form-check-input" type="radio" name="existed_patient" id="existed_patient" value="true" <?php if($body_cont['existed_patient'] && $body_cont['existed_patient'] != 'not_set') { echo 'checked';} ?>>
             <label class="radio" for="existed_patient">
             Existing patient
             </label>
@@ -75,7 +75,7 @@ require_once dirname(__DIR__) . '/classes/Patient.php';
       </div>
     </div>
 </form>
-</div>
+
 <div class="buttons-row-mobile">  
       <?php if($body_cont['editing'] === false){ ?>
           <input type="button" id="bk-btn-mb" value="Back">

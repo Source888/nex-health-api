@@ -22,11 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     extract($data_header);
 
     include('template/head.php');
+
     if (isset($_GET['step'])) {
        $step = $_GET['step'];
        $body_cont = [
                 'step' => $step,
-                'existed_patient' => $_SESSION["existing_patient"] ?? false,
+                'existed_patient' => $_SESSION["existing_patient"] ?? 'not_set',
                 'editing' => $_SESSION['editing'] ?? false,
                 'patient' => $_SESSION['patient'] ?? null,
                 'slots' => $_SESSION["slots"] ?? null,
@@ -35,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'filter_hours' => $_SESSION['filter_hours'] ?? null,
                 'start_date' => $_SESSION['start_date'] ?? null,
                 'end_date' => $_SESSION['end_date'] ?? null,
+                'today' => $_SESSION['today'] ?? false,
                 'days' => $_SESSION['days'] ?? null,
                 'dob' => $_SESSION['dob'] ?? null,
                 'for_who_app' => $_SESSION["for_who_app"] ?? null,
@@ -58,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         $body_cont = [
             'step' =>$step ?? 1,
-            'existed_patient' => $_SESSION["existing_patient"] ?? false,
+            'existed_patient' => $_SESSION["existing_patient"] ?? 'not_set',
             'patient' => $_SESSION['patient'] ?? null,
             'editing' => $_SESSION['editing'] ?? false,
             'slots' => $_SESSION["slots"] ?? null,
@@ -67,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'filter_hours' => $_SESSION['filter_hours'] ?? null,
             'start_date' => $_SESSION['start_date'] ?? null,
             'end_date' => $_SESSION['end_date'] ?? null,
+            'today' => $_SESSION['today'] ?? false,
             'days' => $_SESSION['days'] ?? null,
             'dob' => $_SESSION['dob'] ?? null,
             'for_who_app' => $_SESSION["for_who_app"] ?? null,
@@ -351,14 +354,23 @@ echo $output;
                 'data' => $res,
             ];
         } else if ($step == 'filter_dates') {
+            $currentDate = date('Y-m-d');
             $date = $post_data['date'];
             $startDateAndDays = getStartDateAndDays($date);
             $_SESSION['start_date'] = $startDateAndDays[0];
             $_SESSION['end_date'] = $startDateAndDays[2];
+            
             if($_SESSION['start_date'] == $_SESSION['end_date']){
                 $_SESSION['days'] = 1;
+                if($_SESSION['start_date'] == $currentDate){
+                    $_SESSION['today'] = true;
+                } else {
+                    $_SESSION['today'] = false;
+                }
+                
             } else {
                 $_SESSION['days'] = $startDateAndDays[1]+1;
+                $_SESSION['today'] = false;
             }
             $filter_days = $post_data['days'] ?? null;
             $filter_hours = $post_data['times'] ?? null;

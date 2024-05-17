@@ -25,7 +25,7 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         </div>
         <?php } else { ?>
             <div class="today">
-                <label for="today"> <input type="checkbox" id="today" name="today" value="today" <?php if($body_cont['start_date'] == $body_cont['end_date']) { echo 'checked';} ?>>
+                <label for="today"> <input type="checkbox" id="today" name="today" value="today" <?php if($body_cont['today']) { echo 'checked';} ?>>
                 Today</label> 
             </div>
     <?php } ?>
@@ -143,22 +143,22 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
         <div class="filter-by-day">
             <span>Which day work best?</span>
             <div name="filter-by-day" id="filter-by-day">
-                <div data-day="Mon" <?php if(is_array($body_cont['filter_days']) && in_array('Mon', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>M</div>
-                <div data-day="Tue" <?php if(is_array($body_cont['filter_days']) && in_array('Tue', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>T</div>
-                <div data-day="Wed" <?php if(is_array($body_cont['filter_days']) && in_array('Wed', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>W</div>
-                <div data-day="Thu" <?php if(is_array($body_cont['filter_days']) && in_array('Thu', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>T</div>
-                <div data-day="Fri" <?php if(is_array($body_cont['filter_days']) && in_array('Fri', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>F</div>
-                <div data-day="Sat" <?php if(is_array($body_cont['filter_days']) && in_array('Sat', $body_cont['filter_days'])) { echo 'class="selected"';} ?>>S</div>
+                <div class="d-div <?php if(is_array($body_cont['filter_days']) && in_array('Mon', $body_cont['filter_days'])) { echo 'selected';} ?>" data-day="Mon">M</div>
+                <div class="d-div <?php if(is_array($body_cont['filter_days']) && in_array('Tue', $body_cont['filter_days'])) { echo 'selected';} ?>" data-day="Tue">T</div>
+                <div class="d-div <?php if(is_array($body_cont['filter_days']) && in_array('Wed', $body_cont['filter_days'])) { echo 'selected';} ?>" data-day="Wed">W</div>
+                <div class="d-div <?php if(is_array($body_cont['filter_days']) && in_array('Thu', $body_cont['filter_days'])) { echo 'selected';} ?>" data-day="Thu">T</div>
+                <div class="d-div <?php if(is_array($body_cont['filter_days']) && in_array('Fri', $body_cont['filter_days'])) { echo 'selected';} ?>" data-day="Fri">F</div>
+                <div class="d-div <?php if(is_array($body_cont['filter_days']) && in_array('Sat', $body_cont['filter_days'])) { echo 'selected';} ?>" data-day="Sat">S</div>
             </div>
         </div>
         <div class="filter-by-time">
             <span>What time of day?</span>
             <div class="by-time">
-                <input type="radio" id="all-time" name="filter-by-time" value="ALL">
+                <input type="radio" id="all-time" name="filter-by-time-dt" value="ALL">
                 <label for="all-time">All</label><br>
-                <input type="radio" id="am-time" name="filter-by-time" value="AM">
+                <input type="radio" id="am-time" name="filter-by-time-dt" value="AM">
                 <label for="am-time">am</label>
-                <input type="radio" id="pm-time" name="filter-by-time" value="PM">
+                <input type="radio" id="pm-time" name="filter-by-time-dt" value="PM">
                 <label for="pm-time">pm</label>
             </div>
             
@@ -240,13 +240,13 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             }
         } else {
             if($('a.datepick-selected').length == 1){
-                firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
-                firstA.parent().css("cssText", "border-radius: 20px;");
+                firstA.css("cssText", "border-radius: 25px; background-color: #27c0c8 !important;");
+                firstA.parent().css("cssText", "border-radius: 25px;");
             } else {
-                firstA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
-                firstA.parent().css("cssText", "border-top-left-radius: 20px; border-bottom-left-radius: 20px; background-color: #27c0c878 !important;");
-                lastA.css("cssText", "border-radius: 20px; background-color: #27c0c8 !important;");
-                lastA.parent().css("cssText", "border-top-right-radius: 20px; border-bottom-right-radius: 20px; background-color: #27c0c878 !important;");
+                firstA.css("cssText", "border-radius: 25px; background-color: #27c0c8 !important;");
+                firstA.parent().css("cssText", "border-top-left-radius: 25px; border-bottom-left-radius: 25px; background-color: #27c0c878 !important;");
+                lastA.css("cssText", "border-radius: 25px; background-color: #27c0c8 !important;");
+                lastA.parent().css("cssText", "border-top-right-radius: 25px; border-bottom-right-radius: 25px; background-color: #27c0c878 !important;");
             }
         }
         
@@ -372,8 +372,8 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             var filter_el = '.tab-filter div #filter-by-day div';
             var time_el = '.tab-filter div input[name="filter-by-time"]';
         } else {
-            var filter_el = '#filter-by-day div';
-            var time_el = 'input[name="filter-by-time"]';
+            var filter_el = '#filter-by-day div.d-div';
+            var time_el = 'input[name="filter-by-time-dt"]';
         }
         $(filter_el).each(function(){
             if ($(this).hasClass('selected')) {
@@ -439,18 +439,18 @@ require_once dirname(__DIR__) . '/classes/Provider.php';
             var days = [];
             var times = [];
             if(screen.width <= 820){
-                var filter_el = '.tab-filter div #filter-by-day div';
-                var time_el = '.tab-filter div input[name="filter-by-time"]';
+                var filter_el = $('.tab-filter div #filter-by-day div');
+                var time_el = $('.tab-filter div input[name="filter-by-time"]');
             } else {
-                var filter_el = '#filter-by-day div';
-                var time_el = 'input[name="filter-by-time"]';
+                var filter_el = $('#filter-by-day div.d-div');
+                var time_el = $('input[name="filter-by-time-dt"]');
             }
-            $(filter_el).each(function(){
+            filter_el.each(function(){
                 if ($(this).hasClass('selected')) {
                     days.push($(this).data('day'));
                 }
             });
-            $(time_el).each(function(){
+            time_el.each(function(){
                 if ($(this).is(':checked')) {
                     times.push($(this).val());
                 }
@@ -477,8 +477,8 @@ if(screen.width <= 820){
     var cont_to_view = '.mobile-calendar-and-filter-holder .tab-content #calendar-tab';
 $('#calendar-tab').datepick({ 
     rangeSelect: true,
-    prevText: '<',
-    nextText: '>',
+    prevText: '‹',
+    nextText: '›',
     todayText: '',
     rangeSeparator: ' - ',
     onSelect: function(dates) {
@@ -520,8 +520,8 @@ $('#calendar-tab').datepick({
     defaultDate: new Date(),
     
     rangeSelect: true,
-    prevText: '<',
-    nextText: '>',
+    prevText: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="24" viewBox="190 157.797 12 24"><path d="M202.692 158.797 191 170.742l11.692 11.879" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="#b2b2b2" fill="transparent" data-name="Path 35"/></svg>',
+    nextText: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="24" viewBox="521.308 157.885 12 24"><path d="M522.308 182.709 534 170.764l-11.692-11.879" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="#1a1a1a" fill="transparent" data-name="Path 34"/></svg>',
     todayText: '',
     rangeSeparator: ' - ',
     
@@ -601,7 +601,7 @@ $('#calendar-tab').datepick({
         var today = new Date();
             
             var dd = String(today.getDate()).padStart(2, '0');
-            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
             var yyyy = today.getFullYear();
 
             today = yyyy + '-' + mm + '-' + dd;

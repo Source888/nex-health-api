@@ -1,3 +1,8 @@
+@media screen and (max-width: 1075px) {
+    .app-type-block {
+        flex: 0 0 calc(33% - 15px);
+    }
+}
 @media screen and (max-width: 820px){
     html {
         background-color: #fff;
@@ -329,8 +334,8 @@
         border: 2px solid #b2b2b2;
         border-radius: 10px;
         padding: 10px;
-        flex-basis: 23%;
-        flex: 45%;
+        flex: 0 0 calc(50% - 15px);
+    
         width: 45%;
         flex-direction: column;
         align-items: center;
@@ -615,5 +620,8 @@
     }
     input#bk-btn-mb {
         background-color: #f2f2f2;
+    }
+    .app-type-block {
+        flex: 0 0 calc(50% - 15px);
     }
 }
